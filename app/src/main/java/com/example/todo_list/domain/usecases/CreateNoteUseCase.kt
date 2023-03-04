@@ -6,7 +6,7 @@ import io.reactivex.rxjava3.core.Single
 
 class CreateNoteUseCase(private val repository: NoteRepository) {
 
-    operator fun invoke(text: String, hasReminder: Boolean): Single<Note> {
-        return repository.createNote(text, hasReminder)
+    operator fun invoke(text: String, isReminderActive: Boolean): Single<Note> {
+        return repository.createNote(text, isReminderActive)
     }
 }
