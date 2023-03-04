@@ -6,13 +6,13 @@ import io.reactivex.rxjava3.core.Single
 
 interface NoteRepository {
 
-    fun createNote(text: String, hasRemind: Boolean): Single<Note>
+    fun createNote(text: String, isReminderActive: Boolean): Single<Note>
     fun getAllNotes(): Single<List<Note>>
-    fun updateNote(
-        updatedId: Int,
+    fun updateNoteById(
+        id: Int,
         text: String? = null,
         isCompleted: Boolean? = null,
-        hasReminder : Boolean? = null
+        isReminderActive : Boolean? = null
     ): Completable
     fun deleteNote(noteId: Int): Completable
 }

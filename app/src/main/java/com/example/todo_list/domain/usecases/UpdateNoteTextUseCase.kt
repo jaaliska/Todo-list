@@ -6,7 +6,7 @@ import io.reactivex.rxjava3.core.Completable
 class UpdateNoteTextUseCase(private val repository: NoteRepository) {
 
     operator fun invoke(updatedId: Int, text: String): Completable {
-        return repository.updateNote(updatedId, text)
+        return repository.updateNoteById(updatedId, text)
     }
 
 }

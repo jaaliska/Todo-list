@@ -17,6 +17,12 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     buildTypes {
@@ -51,16 +57,26 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
 
     // DI
-    implementation 'com.google.dagger:dagger:2.45'
-    kapt 'com.google.dagger:dagger-compiler:2.45'
+    implementation "com.google.dagger:dagger:${project.versions.dagger_version}"
+    kapt "com.google.dagger:dagger-compiler:${project.versions.dagger_version}"
 
     // Moxy
-    implementation 'com.arello-mobile:moxy:1.5.5'
-    annotationProcessor 'com.arello-mobile:moxy-compiler:1.5.5'
-    implementation 'com.arello-mobile:moxy-android:1.5.5'
+    implementation "com.arello-mobile:moxy:${project.versions.moxy_version}"
+    annotationProcessor "com.arello-mobile:moxy-compiler:${project.versions.moxy_version}"
+    implementation "com.arello-mobile:moxy-android:${project.versions.moxy_version}"
+
+    // Room
+    implementation "androidx.room:room-runtime:${project.versions.room_version}"
+    kapt "androidx.room:room-compiler:${project.versions.room_version}"
+    implementation "androidx.room:room-ktx:${project.versions.room_version}"
+    implementation "androidx.room:room-rxjava3:${project.versions.room_version}"
 
     // Tests
     testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    testImplementation  "org.mockito:mockito-core:3.12.4"
+    androidTestImplementation 'org.mockito:mockito-android:3.10.0'
+    androidTestImplementation 'org.mockito:mockito-inline:3.5.13'
 }
