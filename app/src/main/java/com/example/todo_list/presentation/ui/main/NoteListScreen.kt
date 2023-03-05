@@ -9,7 +9,7 @@ import com.example.todo_list.R
 import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.databinding.FragmentMainBinding
 import com.example.todo_list.domain.model.Note
-import com.example.todo_list.presentation.ui.BaseFragment
+import com.example.todo_list.presentation.ui.base.BaseFragment
 import moxy.ktx.moxyPresenter
 
 class NoteListScreen : BaseFragment(), NoteListView {
@@ -52,6 +52,18 @@ class NoteListScreen : BaseFragment(), NoteListView {
     }
 
     override fun goEditNoteScreen(note: Note?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun showProgressDialog() {
+        TODO("Not yet implemented")
+    }
+
+    override fun hideProgressDialog() {
+        TODO("Not yet implemented")
+    }
+
+    override fun showErrorToast(error: String) {
         TODO("Not yet implemented")
     }
 }

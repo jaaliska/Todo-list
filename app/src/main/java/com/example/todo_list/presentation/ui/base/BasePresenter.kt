@@ -1,4 +1,4 @@
-package com.example.todo_list.presentation.ui
+package com.example.todo_list.presentation.ui.base
 
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Maybe
