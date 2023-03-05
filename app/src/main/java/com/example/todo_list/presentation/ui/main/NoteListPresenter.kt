@@ -2,7 +2,7 @@ package com.example.todo_list.presentation.ui.main
 
 import com.example.todo_list.domain.usecases.GetAllNotesUseCase
 import com.example.todo_list.domain.usecases.UpdateNoteCompleteStateUseCase
-import com.example.todo_list.presentation.ui.BasePresenter
+import com.example.todo_list.presentation.ui.base.BasePresenter
 import moxy.InjectViewState
 import javax.inject.Inject
 

@@ -10,7 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.todo_list.R
 import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.databinding.FragmentEditNoteBinding
-import com.example.todo_list.presentation.ui.BaseFragment
+import com.example.todo_list.presentation.ui.base.BaseFragment
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import moxy.ktx.moxyPresenter
 
@@ -100,6 +100,18 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
 
     override fun goBack() {
         findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
+    }
+
+    override fun showProgressDialog() {
+        TODO("Not yet implemented")
+    }
+
+    override fun hideProgressDialog() {
+        TODO("Not yet implemented")
+    }
+
+    override fun showErrorToast(error: String) {
+        TODO("Not yet implemented")
     }
 
 }
