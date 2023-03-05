@@ -1,13 +1,22 @@
 package com.example.todo_list.presentation.ui.main
 
 import android.os.Bundle
-import android.view.*
-import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.example.todo_list.R
+import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.databinding.FragmentMainBinding
+import com.example.todo_list.domain.model.Note
+import com.example.todo_list.presentation.ui.BaseFragment
+import moxy.ktx.moxyPresenter
 
-class MainScreen : Fragment() {
+class NoteListScreen : BaseFragment(), NoteListView {
+
+    private val presenter by moxyPresenter {
+        (requireActivity().application as TodoListApp).appComponent.noteListPresenter()
+    }
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
@@ -32,5 +41,17 @@ class MainScreen : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun showUncompletedNotes(list: List<Note>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun showCompletedNotes(list: List<Note>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun goEditNoteScreen(note: Note?) {
+        TODO("Not yet implemented")
     }
 }

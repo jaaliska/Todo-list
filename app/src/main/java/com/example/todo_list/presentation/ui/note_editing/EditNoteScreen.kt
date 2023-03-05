@@ -3,16 +3,22 @@ package com.example.todo_list.presentation.ui.note_editing
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.example.todo_list.R
+import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.databinding.FragmentEditNoteBinding
+import com.example.todo_list.presentation.ui.BaseFragment
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import moxy.ktx.moxyPresenter
 
-class EditNoteScreen : Fragment() {
+class EditNoteScreen : BaseFragment(), EditNoteView {
+
+    private val presenter by moxyPresenter {
+        (requireActivity().application as TodoListApp).appComponent.editNotePresenter()
+    }
 
     private var _binding: FragmentEditNoteBinding? = null
     private val binding get() = _binding!!
@@ -33,6 +39,7 @@ class EditNoteScreen : Fragment() {
 
         binding.fab.setOnClickListener { _ ->
             goBack()
+            presenter.onSaveButtonClicked()
         }
     }
 
@@ -79,7 +86,19 @@ class EditNoteScreen : Fragment() {
         (requireActivity() as AppCompatActivity).supportActionBar?.title = tittle
     }
 
-    private fun goBack() {
+    override fun setText(text: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun setReminderState(isReminderActive: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override fun showDeleteIcon() {
+        TODO("Not yet implemented")
+    }
+
+    override fun goBack() {
         findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
     }
 

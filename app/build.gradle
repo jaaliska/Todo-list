@@ -58,12 +58,17 @@ dependencies {
 
     // DI
     implementation "com.google.dagger:dagger:${project.versions.dagger_version}"
+    implementation "com.google.dagger:dagger-android:${project.versions.dagger_version}"
+    implementation "com.google.dagger:dagger-android-support:${project.versions.dagger_version}"
     kapt "com.google.dagger:dagger-compiler:${project.versions.dagger_version}"
+    kapt "com.google.dagger:dagger-android-processor:${project.versions.dagger_version}"
+    kapt "com.google.dagger:dagger-android-support:${project.versions.dagger_version}"
 
     // Moxy
-    implementation "com.arello-mobile:moxy:${project.versions.moxy_version}"
-    annotationProcessor "com.arello-mobile:moxy-compiler:${project.versions.moxy_version}"
-    implementation "com.arello-mobile:moxy-android:${project.versions.moxy_version}"
+    implementation "com.github.moxy-community:moxy:${project.versions.moxy_version}"
+    kapt "com.github.moxy-community:moxy-compiler:${project.versions.moxy_version}"
+    implementation "com.github.moxy-community:moxy-androidx:${project.versions.moxy_version}"
+    implementation "com.github.moxy-community:moxy-ktx:${project.versions.moxy_version}"
 
     // Room
     implementation "androidx.room:room-runtime:${project.versions.room_version}"
