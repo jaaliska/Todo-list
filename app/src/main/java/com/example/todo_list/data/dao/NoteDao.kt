@@ -9,7 +9,7 @@ import io.reactivex.rxjava3.core.Single
 interface NoteDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun save(value: RoomNote): Long
+    fun save(value: RoomNote): Single<Long>
 
     @Query("DELETE FROM note WHERE id = :id")
     fun delete(id: Int): Completable

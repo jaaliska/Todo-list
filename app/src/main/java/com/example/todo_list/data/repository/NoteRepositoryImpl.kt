@@ -16,15 +16,17 @@ class NoteRepositoryImpl @Inject constructor(
     private val mapper = DbModelMapper
 
     override fun createNote(text: String, isReminderActive: Boolean): Single<Note> {
-        val id = db.save(
-            RoomNote(
-                text = text,
-                isCompleted = false,
-                isReminderActive = isReminderActive
-            )
-        )
-        return db.getNoteById(id.toInt()).map {
-            mapper.map(it)
+        return db.save(
+                RoomNote(
+                    text = text,
+                    isCompleted = false,
+                    isReminderActive = isReminderActive
+                )
+            ).flatMap {
+            db.getNoteById(it.toInt())
+                .map {
+                    mapper.map(it)
+                }
         }
     }
 
