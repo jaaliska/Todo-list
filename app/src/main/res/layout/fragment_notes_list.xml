@@ -4,8 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.ui.main.NoteListScreen">
+    tools:context=".presentation.ui.notes_list.NotesListScreen">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/toolbarRoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:theme="@style/Theme.Todolist.AppBarOverlay">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:title="@string/note_list_tittle"
+            app:popupTheme="@style/Theme.Todolist.PopupOverlay" />
+
+    </com.google.android.material.appbar.AppBarLayout>
     <TextView
         android:id="@+id/textview_no_notes"
         android:layout_width="wrap_content"
@@ -13,6 +30,7 @@
         android:text="@string/no_notes"
         android:gravity="center"
         android:textSize="18sp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -1,4 +1,4 @@
-package com.example.todo_list.presentation.ui.main
+package com.example.todo_list.presentation.ui.notes_list
 
 import android.content.Context
 import android.os.Bundle
@@ -6,32 +6,33 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.example.todo_list.R
 import com.example.todo_list.app.TodoListApp
-import com.example.todo_list.databinding.FragmentMainBinding
+import com.example.todo_list.databinding.FragmentNotesListBinding
 import com.example.todo_list.domain.model.Note
 import com.example.todo_list.presentation.ui.base.BaseFragment
 import moxy.ktx.moxyPresenter
 import javax.inject.Inject
 import javax.inject.Provider
 
-class NoteListScreen : BaseFragment(), NoteListView {
+class NotesListScreen : BaseFragment(), NotesListView {
 
     @Inject
-    lateinit var presenterProvider: Provider<NoteListPresenter>
+    lateinit var presenterProvider: Provider<NotesListPresenter>
     private val presenter by moxyPresenter {
         presenterProvider.get()
     }
 
-    private var _binding: FragmentMainBinding? = null
+    private var _binding: FragmentNotesListBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMainBinding.inflate(inflater, container, false)
+        _binding = FragmentNotesListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -44,9 +45,8 @@ class NoteListScreen : BaseFragment(), NoteListView {
         super.onViewCreated(view, savedInstanceState)
         presenter.onButtonAddNoteClicked()
         binding.fab.setOnClickListener { _ ->
-            val a = Note(1, "Check this note", false, true)
-            val bundle = bundleOf("note" to a)
-            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment, bundle)
+            val bundle = bundleOf("note" to null)
+            findNavController().navigate(R.id.action_NotesListScreen_to_EditNoteScreen, bundle)
         }
 
     }
@@ -66,6 +66,10 @@ class NoteListScreen : BaseFragment(), NoteListView {
 
     override fun goEditNoteScreen(note: Note?) {
         TODO("Not yet implemented")
+    }
+
+    override fun showEmptyScreen() {
+        binding.textviewNoNotes.isVisible = true
     }
 
     override fun showProgressDialog() {
