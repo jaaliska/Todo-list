@@ -1,29 +1,34 @@
 package com.example.todo_list.presentation.ui.note_editing
 
+import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
-import androidx.lifecycle.Lifecycle
+import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import com.example.todo_list.R
 import com.example.todo_list.app.TodoListApp
+import com.example.todo_list.app.di.factory.EditNotePresenterFactory
 import com.example.todo_list.databinding.FragmentEditNoteBinding
 import com.example.todo_list.presentation.ui.base.BaseFragment
-import io.reactivex.rxjava3.subjects.BehaviorSubject
+import com.example.todo_list.presentation.utils.ui_kit.ProgressDialog
 import moxy.ktx.moxyPresenter
+import javax.inject.Inject
 
 class EditNoteScreen : BaseFragment(), EditNoteView {
 
-    private val presenter by moxyPresenter {
-        (requireActivity().application as TodoListApp).appComponent.editNotePresenter()
+    @Inject
+    lateinit var presenterFactory: EditNotePresenterFactory
+    private val presenter by moxyPresenter<EditNotePresenter> {
+        presenterFactory.create(
+            arguments?.getParcelable("note")
+        )
     }
 
     private var _binding: FragmentEditNoteBinding? = null
     private val binding get() = _binding!!
-
-    private val isNotificationOn = BehaviorSubject.createDefault(false)
+    private val progress = ProgressDialog
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,69 +38,71 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
         return binding.root
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        (requireActivity().application as TodoListApp).appComponent.inject(this)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupMenu()
-
         binding.fab.setOnClickListener { _ ->
-            goBack()
             presenter.onSaveButtonClicked()
         }
-    }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private fun setupMenu() {
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.menu_main, menu)
-                isNotificationOn.subscribe {
-                    if(it) {
-                        menu.findItem(R.id.action_bell).setIcon(R.drawable.ic_bell)
-                        menu.findItem(R.id.action_delete).isVisible = true
-                    } else {
-                        menu.findItem(R.id.action_bell).setIcon(R.drawable.ic_bell_off)
-                        menu.findItem(R.id.action_delete).isVisible = false
-                    }
-                }
-
+        binding.editText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.onTextChanged(s.toString())
             }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
 
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
+    override fun setToolbar(
+        isNewNote: Boolean,
+        isReminderActive: Boolean,
+        isDeletingAvailable: Boolean
+    ) {
+        with(binding.toolbar) {
+            menu.clear()
+            inflateMenu(R.menu.menu_main)
+            setNavigationIcon(R.drawable.ic_left_arrow)
+            setNavigationOnClickListener { _ -> goBack() }
+            setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
                     R.id.action_bell -> {
-                        val v = isNotificationOn.value!!
-                        isNotificationOn.onNext(!v)
+                        presenter.onReminderClicked()
                         true
                     }
                     R.id.action_delete -> {
+                        if (isDeletingAvailable) {
+                            presenter.onDeleteButtonClicked()
+                        }
                         true
                     }
                     else -> false
                 }
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
-
-    }
-
-    private fun setToolbarTitle(tittle: String) {
-        (requireActivity() as AppCompatActivity).supportActionBar?.title = tittle
+            if (!isDeletingAvailable) {
+                menu.findItem(R.id.action_delete).isVisible = false
+            }
+            setReminderState(isReminderActive)
+            setTitle(if (isNewNote) R.string.new_note_tittle else R.string.edit_note_tittle)
+        }
     }
 
     override fun setText(text: String) {
-        TODO("Not yet implemented")
+        val currentText = binding.editText.text.toString()
+        if (text != currentText) {
+            binding.editText.setText(text)
+        }
     }
 
     override fun setReminderState(isReminderActive: Boolean) {
-        TODO("Not yet implemented")
-    }
+        binding.toolbar.menu.findItem(R.id.action_bell).setIcon(
+            if (isReminderActive) R.drawable.ic_bell else R.drawable.ic_bell_off
+        )
 
-    override fun showDeleteIcon() {
-        TODO("Not yet implemented")
     }
 
     override fun goBack() {
@@ -103,15 +110,21 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
     }
 
     override fun showProgressDialog() {
-        TODO("Not yet implemented")
+        progress.showProgress(requireContext())
     }
 
     override fun hideProgressDialog() {
-        TODO("Not yet implemented")
+        progress.hideProgress()
     }
 
-    override fun showErrorToast(error: String) {
-        TODO("Not yet implemented")
+    override fun showErrorToast(error: String?) {
+        val message = error ?: getString(R.string.something_went_wrong)
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
 }

@@ -1,9 +1,11 @@
 package com.example.todo_list.presentation.ui.main
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.example.todo_list.R
 import com.example.todo_list.app.TodoListApp
@@ -11,11 +13,15 @@ import com.example.todo_list.databinding.FragmentMainBinding
 import com.example.todo_list.domain.model.Note
 import com.example.todo_list.presentation.ui.base.BaseFragment
 import moxy.ktx.moxyPresenter
+import javax.inject.Inject
+import javax.inject.Provider
 
 class NoteListScreen : BaseFragment(), NoteListView {
 
+    @Inject
+    lateinit var presenterProvider: Provider<NoteListPresenter>
     private val presenter by moxyPresenter {
-        (requireActivity().application as TodoListApp).appComponent.noteListPresenter()
+        presenterProvider.get()
     }
 
     private var _binding: FragmentMainBinding? = null
@@ -29,11 +35,18 @@ class NoteListScreen : BaseFragment(), NoteListView {
         return binding.root
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        (requireActivity().application as TodoListApp).appComponent.inject(this)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        presenter.onButtonAddNoteClicked()
         binding.fab.setOnClickListener { _ ->
-            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+            val a = Note(1, "Check this note", false, true)
+            val bundle = bundleOf("note" to a)
+            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment, bundle)
         }
 
     }
@@ -63,7 +76,7 @@ class NoteListScreen : BaseFragment(), NoteListView {
         TODO("Not yet implemented")
     }
 
-    override fun showErrorToast(error: String) {
+    override fun showErrorToast(error: String?) {
         TODO("Not yet implemented")
     }
 }

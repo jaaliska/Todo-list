@@ -9,7 +9,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import moxy.MvpAppCompatFragment
 
-open class BaseFragment: MvpAppCompatFragment() {
+open class BaseFragment : MvpAppCompatFragment() {
 
     private val lifecycleDisposables = CompositeDisposable()
 
