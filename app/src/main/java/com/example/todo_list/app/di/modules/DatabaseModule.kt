@@ -18,5 +18,5 @@ class DatabaseModule {
         .build()
 
     @Provides
-    fun provideItemDao(db: TodoListDatabase): NoteDao = db.noteDao()
+    fun provideNoteDao(db: TodoListDatabase): NoteDao = db.noteDao()
 }

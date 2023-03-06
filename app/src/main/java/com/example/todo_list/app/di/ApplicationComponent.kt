@@ -4,8 +4,9 @@ import android.app.Application
 import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.app.di.modules.DatabaseModule
 import com.example.todo_list.app.di.modules.RepositoryModule
-import com.example.todo_list.presentation.ui.main.NoteListPresenter
-import com.example.todo_list.presentation.ui.note_editing.EditNotePresenter
+import com.example.todo_list.presentation.ui.MainActivity
+import com.example.todo_list.presentation.ui.main.NoteListScreen
+import com.example.todo_list.presentation.ui.note_editing.EditNoteScreen
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
@@ -23,8 +24,9 @@ interface ApplicationComponent : AndroidInjector<TodoListApp> {
         fun build(): ApplicationComponent
     }
 
-    fun editNotePresenter(): EditNotePresenter
-    fun noteListPresenter(): NoteListPresenter
+    fun inject(activity: MainActivity)
+    fun inject(usernameFragment: NoteListScreen)
+    fun inject(passwordFragment: EditNoteScreen)
 
 }
 

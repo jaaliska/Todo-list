@@ -11,6 +11,6 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindAuthRepository(repository: NoteRepositoryImpl): NoteRepository
+    abstract fun bindNoteRepository(repository: NoteRepositoryImpl): NoteRepository
 
 }
