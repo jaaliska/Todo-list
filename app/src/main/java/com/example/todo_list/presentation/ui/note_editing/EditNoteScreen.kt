@@ -106,7 +106,7 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
     }
 
     override fun goBack() {
-        findNavController().navigate(R.id.action_EditNoteScreen_to_NotesListScreen)
+        findNavController().popBackStack()
     }
 
     override fun showProgressDialog() {

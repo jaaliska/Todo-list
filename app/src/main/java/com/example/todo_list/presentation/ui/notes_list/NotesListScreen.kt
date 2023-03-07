@@ -8,11 +8,15 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todo_list.R
 import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.databinding.FragmentNotesListBinding
 import com.example.todo_list.domain.model.Note
 import com.example.todo_list.presentation.ui.base.BaseFragment
+import com.example.todo_list.presentation.ui.notes_list.adapter.NotesListAdapter
+import com.example.todo_list.presentation.ui.notes_list.view.FoldingListCustomView
+import com.example.todo_list.presentation.ui.notes_list.view.ListCustomView
 import moxy.ktx.moxyPresenter
 import javax.inject.Inject
 import javax.inject.Provider
@@ -27,6 +31,10 @@ class NotesListScreen : BaseFragment(), NotesListView {
 
     private var _binding: FragmentNotesListBinding? = null
     private val binding get() = _binding!!
+
+    private var completedNotesListAdapter: ListCustomView<NotesListView.Item>? = null
+    private var uncompletedNotesListAdapter: NotesListAdapter? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,33 +51,71 @@ class NotesListScreen : BaseFragment(), NotesListView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        presenter.onButtonAddNoteClicked()
         binding.fab.setOnClickListener { _ ->
-            val bundle = bundleOf("note" to null)
-            findNavController().navigate(R.id.action_NotesListScreen_to_EditNoteScreen, bundle)
+            presenter.onButtonAddNoteClicked()
         }
-
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun showUncompletedNotes(listItems: List<NotesListView.Item>) {
+        setNoNotesTextVisibility(false)
+        if (uncompletedNotesListAdapter == null) {
+            uncompletedNotesListAdapter = createListAdapter(listItems)
+            binding.uncompletedNotesContainer.layoutManager = LinearLayoutManager(context)
+            binding.uncompletedNotesContainer.adapter = uncompletedNotesListAdapter
+        } else {
+            uncompletedNotesListAdapter!!.submitList(listItems)
+        }
     }
 
-    override fun showUncompletedNotes(list: List<Note>) {
-        TODO("Not yet implemented")
+    override fun showCompletedNotes(listItems: List<NotesListView.Item>, isPanelOpen: Boolean) {
+        setNoNotesTextVisibility(false)
+        if (completedNotesListAdapter == null) {
+            binding.completedNotesContainer.removeAllViews()
+            completedNotesListAdapter = FoldingListCustomView(
+                isPanelOpen,
+                presenter::onFoldingPanelCLicked,
+                createListAdapter(listItems)
+            ).also {
+                binding.completedNotesContainer.addView(it.build(binding.completedNotesContainer))
+            }
+        } else {
+            completedNotesListAdapter!!.submitList(listItems)
+        }
     }
 
-    override fun showCompletedNotes(list: List<Note>) {
-        TODO("Not yet implemented")
+    override fun hideCompletedNotes() {
+        completedNotesListAdapter = null
+        binding.completedNotesContainer.removeAllViews()
     }
 
-    override fun goEditNoteScreen(note: Note?) {
-        TODO("Not yet implemented")
+    private fun createListAdapter(listItems: List<NotesListView.Item>) = NotesListAdapter(
+        { item ->
+            presenter.onNoteClicked(item.id)
+        },
+        { item, isCheck ->
+            presenter.onNoteCheckboxClicked(item.id, isCheck)
+        }
+    ).also {
+        it.submitList(listItems)
+    }
+
+    override fun goToEditNoteScreen(note: Note?) {
+        val bundle = bundleOf("note" to note)
+        findNavController().navigate(R.id.action_NotesListScreen_to_EditNoteScreen, bundle)
     }
 
     override fun showEmptyScreen() {
-        binding.textviewNoNotes.isVisible = true
+        with(binding) {
+            uncompletedNotesContainer.removeAllViews()
+            completedNotesContainer.removeAllViews()
+            setNoNotesTextVisibility(true)
+        }
+    }
+
+    private fun setNoNotesTextVisibility(isVisible: Boolean) {
+        if (binding.textviewNoNotes.isVisible != isVisible) {
+            binding.textviewNoNotes.isVisible = isVisible
+        }
     }
 
     override fun showProgressDialog() {
@@ -82,5 +128,16 @@ class NotesListScreen : BaseFragment(), NotesListView {
 
     override fun showErrorToast(error: String?) {
         TODO("Not yet implemented")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        completedNotesListAdapter = null
+        uncompletedNotesListAdapter = null
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

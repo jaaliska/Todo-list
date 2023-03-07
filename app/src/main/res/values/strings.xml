@@ -8,6 +8,8 @@
     <!-- NotesListScreen -->
     <string name="note_list_tittle">Список заметок</string>
     <string name="no_notes">Заметок пока нет.\nНажмите + чтобы добавить заметку</string>
+    <string name="hide_notes">Скрыть выполненнные</string>
+    <string name="open_notes">Отобразить выполненнные</string>
 
     <!-- EditeNoteScreen -->
     <string name="autofill_edit_text">Текст заметки</string>

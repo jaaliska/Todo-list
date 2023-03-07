@@ -20,9 +20,5 @@
         android:name="com.example.todo_list.presentation.ui.note_editing.EditNoteScreen"
         android:label="@string/edit_note_tittle"
         tools:layout="@layout/fragment_edit_note">
-
-        <action
-            android:id="@+id/action_EditNoteScreen_to_NotesListScreen"
-            app:destination="@id/NotesListScreen" />
     </fragment>
 </navigation>

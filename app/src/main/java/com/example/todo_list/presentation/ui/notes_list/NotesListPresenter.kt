@@ -12,14 +12,20 @@ import javax.inject.Inject
 @InjectViewState
 class NotesListPresenter @Inject constructor(
     private val getAllNotes: GetAllNotesUseCase,
-    updateNoteCompleteState: UpdateNoteCompleteStateUseCase,
-): BasePresenter<NotesListView>() {
+    private val updateNoteCompleteState: UpdateNoteCompleteStateUseCase,
+) : BasePresenter<NotesListView>() {
 
-    lateinit var listNotes: List<Note>
+    lateinit var notes: List<Note>
+    private val uncompletedNotes = mutableListOf<NotesListView.Item>()
+    private val completedNotes = mutableListOf<NotesListView.Item>()
 
 
     override fun attachView(view: NotesListView?) {
         super.attachView(view)
+        refreshView()
+    }
+
+    private fun refreshView() {
         getAllNotes()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -27,30 +33,62 @@ class NotesListPresenter @Inject constructor(
                 viewState.showErrorToast()
             }
             .subscribeByPresenter {
-                listNotes = it
+                notes = it
                 setListNote()
             }
-
     }
 
     private fun setListNote() {
-        if (listNotes.isEmpty()) {
+        if (notes.isEmpty()) {
             viewState.showEmptyScreen()
         } else {
-
+            completedNotes.clear()
+            uncompletedNotes.clear()
+            notes.map {
+                val note = NotesListView.Item(
+                    id = it.id,
+                    text = it.text,
+                    isChecked = it.isCompleted
+                )
+                if (note.isChecked) {
+                    completedNotes.add(note)
+                } else {
+                    uncompletedNotes.add(note)
+                }
+            }
+            viewState.showUncompletedNotes(uncompletedNotes)
+            if (completedNotes.isNotEmpty()) {
+                viewState.showCompletedNotes(completedNotes, true)
+            } else {
+                viewState.hideCompletedNotes()
+            }
         }
     }
 
     fun onNoteClicked(id: Int) {
-
+        viewState.goToEditNoteScreen(notes.find {
+            it.id == id
+        })
     }
 
-    fun onCheckboxClicked(id: Int, isChecked:Boolean) {
+    fun onNoteCheckboxClicked(id: Int, isChecked: Boolean) {
+        updateNoteCompleteState(id, isChecked)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnError {
+                viewState.showErrorToast()
+            }
+            .subscribeByPresenter {
+                refreshView()
+            }
+    }
+
+    fun onFoldingPanelCLicked(isFolded: Boolean) {
 
     }
 
     fun onButtonAddNoteClicked() {
-
+        viewState.goToEditNoteScreen(null)
     }
 
 }
