@@ -3,6 +3,7 @@ package com.example.todo_list.presentation.ui.notes_list.adapter
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo_list.R
@@ -13,7 +14,7 @@ class NotesListAdapter(
     private val onItemClick: (item: Item) -> Unit,
     private val onCheckboxClick: (item: Item, isCheck: Boolean) -> Unit,
 ) : ListAdapter<Item, NotesListAdapter.NotesListViewHolder>(
-    Item.diffCallback
+    diffCallback
 ) {
 
     class NotesListViewHolder(private val binding: ItemNoteBinding) :
@@ -24,8 +25,8 @@ class NotesListAdapter(
             onCheckboxClick: (item: Item, isCheck: Boolean) -> Unit
         ) {
             itemView.apply {
-                if(item.isChecked) {
-                    val strikeText = Html.fromHtml("<s>" +item.text+ "</s>", )
+                if (item.isChecked) {
+                    val strikeText = Html.fromHtml("<s>" + item.text + "</s>")
                     binding.text.text = strikeText
                     binding.text.setTextAppearance(R.style.Core_Style_Text_Disabled)
                 } else {
@@ -41,11 +42,6 @@ class NotesListAdapter(
                 }
             }
         }
-    }
-
-    override fun submitList(list: List<Item>?) {
-        super.submitList(list)
-        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotesListViewHolder {
@@ -64,4 +60,25 @@ class NotesListAdapter(
         holder.bind(currentList[position], onItemClick, onCheckboxClick)
     }
 
+    companion object {
+        val diffCallback = object : DiffUtil.ItemCallback<Item>() {
+
+            override fun areItemsTheSame(
+                oldItem: Item,
+                newItem: Item
+            ): Boolean {
+                return oldItem == newItem
+            }
+
+            override fun areContentsTheSame(
+                oldItem: Item,
+                newItem: Item
+            ): Boolean {
+                return oldItem.id == newItem.id &&
+                        oldItem.text == newItem.text &&
+                        oldItem.isChecked == newItem.isChecked
+            }
+        }
+    }
 }
+

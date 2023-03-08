@@ -18,6 +18,7 @@ class NotesListPresenter @Inject constructor(
     lateinit var notes: List<Note>
     private val uncompletedNotes = mutableListOf<NotesListView.Item>()
     private val completedNotes = mutableListOf<NotesListView.Item>()
+    private var isFoldingPanelOpen = false
 
 
     override fun attachView(view: NotesListView?) {
@@ -34,11 +35,11 @@ class NotesListPresenter @Inject constructor(
             }
             .subscribeByPresenter {
                 notes = it
-                setListNote()
+                setNotesList()
             }
     }
 
-    private fun setListNote() {
+    private fun setNotesList() {
         if (notes.isEmpty()) {
             viewState.showEmptyScreen()
         } else {
@@ -56,9 +57,9 @@ class NotesListPresenter @Inject constructor(
                     uncompletedNotes.add(note)
                 }
             }
-            viewState.showUncompletedNotes(uncompletedNotes)
+            viewState.showUncompletedNotes(uncompletedNotes.toList())
             if (completedNotes.isNotEmpty()) {
-                viewState.showCompletedNotes(completedNotes, true)
+                viewState.showCompletedNotes(completedNotes.toList(), isFoldingPanelOpen)
             } else {
                 viewState.hideCompletedNotes()
             }
@@ -83,8 +84,9 @@ class NotesListPresenter @Inject constructor(
             }
     }
 
-    fun onFoldingPanelCLicked(isFolded: Boolean) {
-
+    fun onFoldingPanelCLicked(isOpen: Boolean) {
+        isFoldingPanelOpen = isOpen
+        //TODO saving state to prefs
     }
 
     fun onButtonAddNoteClicked() {

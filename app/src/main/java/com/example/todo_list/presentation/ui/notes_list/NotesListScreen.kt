@@ -2,6 +2,7 @@ package com.example.todo_list.presentation.ui.notes_list
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +33,7 @@ class NotesListScreen : BaseFragment(), NotesListView {
     private var _binding: FragmentNotesListBinding? = null
     private val binding get() = _binding!!
 
-    private var completedNotesListAdapter: ListCustomView<NotesListView.Item>? = null
+    private var completedNotesListView: ListCustomView<NotesListView.Item>? = null
     private var uncompletedNotesListAdapter: NotesListAdapter? = null
 
 
@@ -62,6 +63,7 @@ class NotesListScreen : BaseFragment(), NotesListView {
             uncompletedNotesListAdapter = createListAdapter(listItems)
             binding.uncompletedNotesContainer.layoutManager = LinearLayoutManager(context)
             binding.uncompletedNotesContainer.adapter = uncompletedNotesListAdapter
+            Log.i("MyCheck", "UncompletedNotes was build")
         } else {
             uncompletedNotesListAdapter!!.submitList(listItems)
         }
@@ -69,22 +71,23 @@ class NotesListScreen : BaseFragment(), NotesListView {
 
     override fun showCompletedNotes(listItems: List<NotesListView.Item>, isPanelOpen: Boolean) {
         setNoNotesTextVisibility(false)
-        if (completedNotesListAdapter == null) {
+        if (completedNotesListView == null) {
             binding.completedNotesContainer.removeAllViews()
-            completedNotesListAdapter = FoldingListCustomView(
+            completedNotesListView = FoldingListCustomView(
                 isPanelOpen,
                 presenter::onFoldingPanelCLicked,
                 createListAdapter(listItems)
             ).also {
                 binding.completedNotesContainer.addView(it.build(binding.completedNotesContainer))
             }
+            Log.i("MyCheck", "Custom view was build")
         } else {
-            completedNotesListAdapter!!.submitList(listItems)
+            completedNotesListView!!.submitList(listItems)
         }
     }
 
     override fun hideCompletedNotes() {
-        completedNotesListAdapter = null
+        completedNotesListView = null
         binding.completedNotesContainer.removeAllViews()
     }
 
@@ -128,12 +131,6 @@ class NotesListScreen : BaseFragment(), NotesListView {
 
     override fun showErrorToast(error: String?) {
         TODO("Not yet implemented")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        completedNotesListAdapter = null
-        uncompletedNotesListAdapter = null
     }
 
     override fun onDestroyView() {

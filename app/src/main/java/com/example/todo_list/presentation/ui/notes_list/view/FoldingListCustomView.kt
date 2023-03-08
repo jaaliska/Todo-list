@@ -1,5 +1,6 @@
 package com.example.todo_list.presentation.ui.notes_list.view
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +18,12 @@ class FoldingListCustomView<T, E : RecyclerView.ViewHolder, V : ListAdapter<T, E
 ) : ListCustomView<T>() {
 
     private lateinit var binding: LayoutFoldingListBinding
-    private var isPanelOpened = isPanelOpenInitially
+    private var isPanelOpen = isPanelOpenInitially
 
     override fun build(parent: ViewGroup): View {
         binding =
             LayoutFoldingListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        Log.i("MyCheck", "build: $isPanelOpen")
         return binding.root
             .render()
             .setupState()
@@ -36,15 +38,18 @@ class FoldingListCustomView<T, E : RecyclerView.ViewHolder, V : ListAdapter<T, E
         binding.itemsContainer.adapter = adapter
 
         setOnClickListener {
-            isPanelOpened = !isPanelOpened
-            onStateChanging(isPanelOpened)
+            Log.i("MyCheck", "old: $isPanelOpen")
+            isPanelOpen = !isPanelOpen
+            onStateChanging(isPanelOpen)
             setupState()
+            Log.i("MyCheck", "new: $isPanelOpen")
         }
     }
 
     private fun View.setupState() = apply {
         with(binding) {
-            if (isPanelOpened) {
+            Log.i("MyCheck", "setup: $isPanelOpen")
+            if (isPanelOpen) {
                 arrowImage.setImageResource(R.drawable.ic_arrow_down)
                 foldingPanelText.setText(R.string.hide_notes)
                 itemsContainer.isVisible = true
