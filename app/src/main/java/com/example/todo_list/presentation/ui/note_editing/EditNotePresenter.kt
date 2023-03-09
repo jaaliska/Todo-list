@@ -3,6 +3,7 @@ package com.example.todo_list.presentation.ui.note_editing
 import com.example.todo_list.domain.model.Note
 import com.example.todo_list.domain.usecases.CreateNoteUseCase
 import com.example.todo_list.domain.usecases.DeleteNoteUseCase
+import com.example.todo_list.domain.usecases.UpdateNoteReminderStateUseCase
 import com.example.todo_list.domain.usecases.UpdateNoteTextUseCase
 import com.example.todo_list.presentation.model.EditableNote
 import com.example.todo_list.presentation.ui.base.BasePresenter
@@ -18,6 +19,7 @@ class EditNotePresenter @AssistedInject constructor(
     private val createNote: CreateNoteUseCase,
     private val updateNoteText: UpdateNoteTextUseCase,
     private val deleteNote: DeleteNoteUseCase,
+    private val updateNoteReminderState: UpdateNoteReminderStateUseCase,
 ) : BasePresenter<EditNoteView>() {
 
     private val note: EditableNote = EditableNote(
@@ -45,14 +47,24 @@ class EditNotePresenter @AssistedInject constructor(
         }
     }
 
+    fun onNotificationPermissionRequestResult(granted: Boolean) {
+        if (granted) {
+            note.isReminderActive = !note.isReminderActive
+            viewState.setReminderState(note.isReminderActive)
+            updateNoteReminderState(
+                note.id ?: 1, //TODO
+                note.isReminderActive
+            )
+        }
+    }
+
     fun onTextChanged(text: String) {
         note.text = text
         viewState.setText(text)
     }
 
     fun onReminderClicked() {
-        note.isReminderActive = !note.isReminderActive
-        viewState.setReminderState(note.isReminderActive)
+        viewState.requestNotificationPermission()
     }
 
     fun onDeleteButtonClicked() {

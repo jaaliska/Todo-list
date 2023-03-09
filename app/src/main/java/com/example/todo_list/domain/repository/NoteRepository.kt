@@ -7,6 +7,7 @@ import io.reactivex.rxjava3.core.Single
 interface NoteRepository {
 
     fun createNote(text: String, isReminderActive: Boolean): Single<Note>
+    fun getNoteById(id: Int): Single<Note>
     fun getAllNotes(): Single<List<Note>>
     fun updateNoteById(
         id: Int,

@@ -30,6 +30,10 @@ class NoteRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getNoteById(id: Int): Single<Note> {
+        return db.getNoteById(id).map { mapper.map(it) }
+    }
+
     override fun getAllNotes(): Single<List<Note>> {
         return db.getAll().map { list ->
             list.map {

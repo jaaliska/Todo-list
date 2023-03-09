@@ -1,11 +1,14 @@
 package com.example.todo_list.presentation.ui.note_editing
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
 import com.example.todo_list.R
 import com.example.todo_list.app.TodoListApp
@@ -30,6 +33,11 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
     private val binding get() = _binding!!
     private val progress = ProgressDialog
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { granted -> presenter.onNotificationPermissionRequestResult(granted) }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,7 +48,7 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        (requireActivity().application as TodoListApp).appComponent.inject(this)
+        TodoListApp.appComponent.inject(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -102,7 +110,17 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
         binding.toolbar.menu.findItem(R.id.action_bell).setIcon(
             if (isReminderActive) R.drawable.ic_bell else R.drawable.ic_bell_off
         )
+    }
 
+    override fun requestNotificationPermission() {
+        if (ContextCompat.checkSelfPermission(
+            requireContext(),
+            TodoListApp.PERMISSION_POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED) {
+            presenter.onNotificationPermissionRequestResult(true)
+        } else {
+            requestPermissionLauncher.launch(TodoListApp.PERMISSION_POST_NOTIFICATIONS)
+        }
     }
 
     override fun goBack() {

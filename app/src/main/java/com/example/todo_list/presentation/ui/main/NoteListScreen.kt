@@ -37,7 +37,7 @@ class NoteListScreen : BaseFragment(), NoteListView {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        (requireActivity().application as TodoListApp).appComponent.inject(this)
+        TodoListApp.appComponent.inject(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
