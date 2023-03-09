@@ -1,14 +1,15 @@
 <resources>
     <string name="app_name">Todo-list</string>
-    <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="main_fragment_label">Список заметок</string>
-    <string name="second_fragment_label">Заметка</string>
-    <string name="new_note_label">Новая заметка</string>
+
+    <!-- Menu -->
     <string name="menu_action_bell">Bell</string>
     <string name="menu_action_delete">Delete</string>
 
+    <!-- NotesListScreen -->
+    <string name="note_list_tittle">Список заметок</string>
     <string name="no_notes">Заметок пока нет.\nНажмите + чтобы добавить заметку</string>
+    <string name="hide_notes">Скрыть выполненнные</string>
+    <string name="open_notes">Отобразить выполненнные</string>
 
     <!-- EditeNoteScreen -->
     <string name="autofill_edit_text">Текст заметки</string>
@@ -21,4 +22,5 @@
 
     <!-- Error -->
     <string name="something_went_wrong">Что-то пошло не так</string>
+
 </resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Core" />
+
+    <style name="Core.Style" />
+
+    <style name="Core.Style.Text"/>
+
+    <style name="Core.Style.Text.Emphasis">
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="Core.Style.Text.MediumEmphasis">
+        <item name="android:textColor">@color/colorTextSecondary</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="Core.Style.Text.Disabled">
+        <item name="android:textColor">@color/colorTextDisabled</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+</resources>
