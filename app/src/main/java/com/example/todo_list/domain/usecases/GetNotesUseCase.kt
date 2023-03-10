@@ -5,11 +5,11 @@ import com.example.todo_list.domain.repository.NoteRepository
 import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
-class GetNoteByIdUseCase @Inject constructor(
+class GetNotesUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
 
-    operator fun invoke(noteId: Int) : Single<Note> {
-        return repository.getNoteById(noteId)
+    operator fun invoke(completed: Boolean): Single<List<Note>> {
+        return repository.getAllByCompletionStatus(completed)
     }
 }

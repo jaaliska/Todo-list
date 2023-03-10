@@ -1,7 +1,9 @@
 package com.example.todo_list.presentation.ui.notes_list
 
-import com.example.todo_list.domain.model.Note
-import com.example.todo_list.domain.usecases.GetAllNotesUseCase
+import com.example.todo_list.data.repository.UserPreferencesRepository
+import com.example.todo_list.domain.usecases.GetNoteByIdUseCase
+import com.example.todo_list.domain.usecases.GetNotesUseCase
+import com.example.todo_list.domain.usecases.HasCompletedNotesUseCase
 import com.example.todo_list.domain.usecases.UpdateNoteCompleteStateUseCase
 import com.example.todo_list.presentation.ui.base.BasePresenter
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -11,65 +13,64 @@ import javax.inject.Inject
 
 @InjectViewState
 class NotesListPresenter @Inject constructor(
-    private val getAllNotes: GetAllNotesUseCase,
+    private val getNoteById: GetNoteByIdUseCase,
+    private val getNotes: GetNotesUseCase,
+    private val hasCompletedNotes: HasCompletedNotesUseCase,
     private val updateNoteCompleteState: UpdateNoteCompleteStateUseCase,
+    private val userPreferences: UserPreferencesRepository
 ) : BasePresenter<NotesListView>() {
+    private var isCompletedNotesPanelOpen = userPreferences.isShowCompletedNotes()
 
-    lateinit var notes: List<Note>
-    private val uncompletedNotes = mutableListOf<NotesListView.Item>()
-    private val completedNotes = mutableListOf<NotesListView.Item>()
-    private var isFoldingPanelOpen = false
-
-
-    override fun attachView(view: NotesListView?) {
-        super.attachView(view)
-        refreshView()
+    override fun onFirstViewAttach() {
+        super.onFirstViewAttach()
+        updateNotes()
+        viewState.setCompletedNotesPanelState(isCompletedNotesPanelOpen)
     }
 
-    private fun refreshView() {
-        getAllNotes()
+    private fun updateNotes() {
+        updateUncompletedNotes()
+        updateCompletedNotes()
+    }
+
+    private fun updateCompletedNotes() {
+        viewState.showProgressDialog()
+        if (isCompletedNotesPanelOpen) {
+            getNotes(true)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError {
+                    viewState.showErrorToast()
+                }
+                .doFinally(viewState::hideProgressDialog)
+                .subscribeByPresenter {
+                    viewState.setCompletedNotes(it.map(NoteItemMapper::map), it.isNotEmpty())
+                }
+        } else {
+            hasCompletedNotes()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError {
+                    viewState.showErrorToast()
+                }
+                .doFinally(viewState::hideProgressDialog)
+                .subscribeByPresenter {
+                    viewState.setCompletedNotes(listOf(), it)
+                }
+        }
+    }
+
+    private fun updateUncompletedNotes() {
+        viewState.showProgressDialog()
+        getNotes(false)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnError {
                 viewState.showErrorToast()
             }
+            .doFinally(viewState::hideProgressDialog)
             .subscribeByPresenter {
-                notes = it
-                setNotesList()
+                viewState.setUncompletedNotes(it.map(NoteItemMapper::map))
             }
-    }
-
-    private fun setNotesList() {
-        if (notes.isEmpty()) {
-            viewState.showEmptyScreen()
-        } else {
-            completedNotes.clear()
-            uncompletedNotes.clear()
-            notes.map {
-                val note = NotesListView.Item(
-                    id = it.id,
-                    text = it.text,
-                    isChecked = it.isCompleted
-                )
-                if (note.isChecked) {
-                    completedNotes.add(note)
-                } else {
-                    uncompletedNotes.add(note)
-                }
-            }
-            viewState.showUncompletedNotes(uncompletedNotes.toList())
-            if (completedNotes.isNotEmpty()) {
-                viewState.showCompletedNotes(completedNotes.toList(), isFoldingPanelOpen)
-            } else {
-                viewState.hideCompletedNotes()
-            }
-        }
-    }
-
-    fun onNoteClicked(id: Int) {
-        viewState.goToEditNoteScreen(notes.find {
-            it.id == id
-        })
     }
 
     fun onNoteCheckboxClicked(id: Int, isChecked: Boolean) {
@@ -80,17 +81,34 @@ class NotesListPresenter @Inject constructor(
                 viewState.showErrorToast()
             }
             .subscribeByPresenter {
-                refreshView()
+                updateNotes()
             }
     }
 
-    fun onFoldingPanelCLicked(isOpen: Boolean) {
-        isFoldingPanelOpen = isOpen
-        //TODO saving state to prefs
+    fun onCompletedNotesPanelClicked() {
+        isCompletedNotesPanelOpen = !isCompletedNotesPanelOpen
+        userPreferences.setShowCompletedNotes(isCompletedNotesPanelOpen)
+        viewState.setCompletedNotesPanelState(isCompletedNotesPanelOpen)
+        if (isCompletedNotesPanelOpen) {
+            updateCompletedNotes()
+        } else {
+            viewState.setCompletedNotes(listOf(), true)
+        }
+    }
+
+    fun onNoteClicked(id: Int) {
+        getNoteById(id)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnError {
+                viewState.showErrorToast()
+            }
+            .subscribeByPresenter {
+                viewState.goToEditNoteScreen(it)
+            }
     }
 
     fun onButtonAddNoteClicked() {
         viewState.goToEditNoteScreen(null)
     }
-
 }

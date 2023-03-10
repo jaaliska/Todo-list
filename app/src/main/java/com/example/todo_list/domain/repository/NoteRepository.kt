@@ -9,6 +9,8 @@ interface NoteRepository {
     fun createNote(text: String, isReminderActive: Boolean): Single<Note>
     fun getNoteById(id: Int): Single<Note>
     fun getAllNotes(): Single<List<Note>>
+    fun getAllByCompletionStatus(completed: Boolean): Single<List<Note>>
+    fun hasCompletedNotes(): Single<Boolean>
     fun updateNoteById(
         id: Int,
         text: String? = null,

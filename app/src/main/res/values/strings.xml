@@ -2,8 +2,8 @@
     <string name="app_name">Todo-list</string>
 
     <!-- Menu -->
-    <string name="menu_action_bell">Bell</string>
-    <string name="menu_action_delete">Delete</string>
+    <string name="menu_action_bell">Напоминание</string>
+    <string name="menu_action_delete">Удалить</string>
 
     <!-- NotesListScreen -->
     <string name="note_list_tittle">Список заметок</string>
@@ -22,5 +22,6 @@
 
     <!-- Error -->
     <string name="something_went_wrong">Что-то пошло не так</string>
+    <string name="create_new_note">Создать новую заметку</string>
 
 </resources>

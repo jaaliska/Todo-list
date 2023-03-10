@@ -7,6 +7,7 @@ import com.example.todo_list.domain.model.Note
 import com.example.todo_list.domain.repository.NoteRepository
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class NoteRepositoryImpl @Inject constructor(
@@ -42,6 +43,18 @@ class NoteRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun getAllByCompletionStatus(completed: Boolean): Single<List<Note>> {
+        return db.getAllByCompletionStatus(completed).map { list ->
+            list.map {
+                mapper.map(it)
+            }
+        }.delay(700, TimeUnit.MILLISECONDS) // emulate long load
+    }
+
+    override fun hasCompletedNotes(): Single<Boolean> {
+        return db.hasCompletedNotes().delay(300, TimeUnit.MILLISECONDS) // emulate long load
+    }
+
     override fun updateNoteById(
         id: Int,
         text: String?,
@@ -49,7 +62,6 @@ class NoteRepositoryImpl @Inject constructor(
         isReminderActive: Boolean?
     ): Completable {
         val listActions = mutableListOf<Completable>()
-
         if (text != null) {
             listActions.add(
                 db.updateText(id, text)

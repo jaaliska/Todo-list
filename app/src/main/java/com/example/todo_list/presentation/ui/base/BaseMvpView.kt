@@ -1,14 +1,17 @@
 package com.example.todo_list.presentation.ui.base
 
 import moxy.MvpView
-import moxy.viewstate.strategy.SingleStateStrategy
+import moxy.viewstate.strategy.AddToEndSingleTagStrategy
 import moxy.viewstate.strategy.StateStrategyType
+import moxy.viewstate.strategy.alias.OneExecution
 
-@StateStrategyType(SingleStateStrategy::class)
-interface BaseMvpView: MvpView {
-
+interface BaseMvpView : MvpView {
+    @StateStrategyType(value = AddToEndSingleTagStrategy::class, tag = "show_hide_progress")
     fun showProgressDialog()
-    fun hideProgressDialog()
-    fun showErrorToast(error: String? = null)
 
+    @StateStrategyType(value = AddToEndSingleTagStrategy::class, tag = "show_hide_progress")
+    fun hideProgressDialog()
+
+    @OneExecution
+    fun showErrorToast(error: String? = null)
 }

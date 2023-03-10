@@ -1,6 +1,6 @@
 package com.example.todo_list.presentation.ui.notes_list.adapter
 
-import android.text.Html
+import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -16,7 +16,6 @@ class NotesListAdapter(
 ) : ListAdapter<Item, NotesListAdapter.NotesListViewHolder>(
     diffCallback
 ) {
-
     class NotesListViewHolder(private val binding: ItemNoteBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(
@@ -24,32 +23,27 @@ class NotesListAdapter(
             onItemClick: (item: Item) -> Unit,
             onCheckboxClick: (item: Item, isCheck: Boolean) -> Unit
         ) {
-            itemView.apply {
+            binding.text.apply {
+                text = item.text
                 if (item.isChecked) {
-                    val strikeText = Html.fromHtml("<s>" + item.text + "</s>")
-                    binding.text.text = strikeText
-                    binding.text.setTextAppearance(R.style.Core_Style_Text_Disabled)
-                } else {
-                    binding.text.text = item.text
-                    binding.text.setTextAppearance(R.style.Core_Style_Text_Emphasis)
+                    paintFlags = binding.text.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 }
-                binding.text.setOnClickListener {
-                    onItemClick(item)
-                }
-                binding.checkbox.isChecked = item.isChecked
-                binding.checkbox.setOnClickListener {
-                    onCheckboxClick(item, !item.isChecked)
-                }
+                setTextAppearance(
+                    if (item.isChecked) R.style.Core_Style_Text_Disabled
+                    else R.style.Core_Style_Text_Emphasis
+                )
+                setOnClickListener { onItemClick(item) }
+            }
+            binding.checkbox.apply {
+                isChecked = item.isChecked
+                setOnClickListener { onCheckboxClick(item, !item.isChecked) }
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotesListViewHolder {
-        val binding =
-            ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return NotesListViewHolder(
-            binding
-        )
+        val binding = ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return NotesListViewHolder(binding)
     }
 
     override fun getItemCount(): Int {
@@ -62,21 +56,12 @@ class NotesListAdapter(
 
     companion object {
         val diffCallback = object : DiffUtil.ItemCallback<Item>() {
-
-            override fun areItemsTheSame(
-                oldItem: Item,
-                newItem: Item
-            ): Boolean {
-                return oldItem == newItem
+            override fun areItemsTheSame(oldItem: Item, newItem: Item): Boolean {
+                return oldItem.id == newItem.id
             }
 
-            override fun areContentsTheSame(
-                oldItem: Item,
-                newItem: Item
-            ): Boolean {
-                return oldItem.id == newItem.id &&
-                        oldItem.text == newItem.text &&
-                        oldItem.isChecked == newItem.isChecked
+            override fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean {
+                return oldItem == newItem
             }
         }
     }

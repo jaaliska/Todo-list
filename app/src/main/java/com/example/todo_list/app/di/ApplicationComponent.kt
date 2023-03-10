@@ -30,8 +30,8 @@ interface ApplicationComponent : AndroidInjector<TodoListApp> {
     fun context(): Context
 
     fun inject(activity: MainActivity)
-    fun inject(usernameFragment: NotesListScreen)
-    fun inject(passwordFragment: EditNoteScreen)
+    fun inject(notesListScreen: NotesListScreen)
+    fun inject(editNoteScreen: EditNoteScreen)
 
 }
 
