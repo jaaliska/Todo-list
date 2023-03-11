@@ -13,6 +13,7 @@ interface EditNoteView : BaseMvpView {
         isReminderActive: Boolean,
         isDeletingAvailable: Boolean
     )
+    fun showExitConfirmationDialog()
     @StateStrategyType(OneExecutionStateStrategy::class)
     fun requestNotificationPermission()
     @StateStrategyType(OneExecutionStateStrategy::class)
