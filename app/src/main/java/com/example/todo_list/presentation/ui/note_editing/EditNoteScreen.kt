@@ -33,6 +33,7 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
     private var _binding: FragmentEditNoteBinding? = null
     private val binding get() = _binding!!
     private val progress = ProgressDialog
+    private var exitConfirmationDialog: AlertDialog? = null
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -101,17 +102,22 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
         }
     }
 
-    override fun showExitConfirmationDialog() {
-        AlertDialog.Builder(context)
-            .setTitle(R.string.edit_note_dialog_tittle)
-            .setMessage(R.string.edit_note_dialog_message)
-            .setPositiveButton(R.string.yes) { _, _ ->
-                presenter.onExitWithoutSavingConfirmed()
-            }
-            .setNegativeButton(R.string.cancel) { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
+    override fun setExitConfirmationDialogState(isShowing: Boolean) {
+        exitConfirmationDialog = if (isShowing) {
+            AlertDialog.Builder(context)
+                .setTitle(R.string.edit_note_dialog_tittle)
+                .setMessage(R.string.edit_note_dialog_message)
+                .setPositiveButton(R.string.yes) { _, _ ->
+                    presenter.onExitWithoutSavingConfirmed(true)
+                }
+                .setNegativeButton(R.string.cancel) { _, _ ->
+                    presenter.onExitWithoutSavingConfirmed(false)
+                }
+                .show()
+        } else {
+            exitConfirmationDialog?.dismiss()
+            null
+        }
     }
 
     override fun setText(text: String) {
@@ -158,6 +164,10 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        if (exitConfirmationDialog != null) {
+            exitConfirmationDialog?.dismiss()
+            exitConfirmationDialog = null
+        }
         _binding = null
     }
 

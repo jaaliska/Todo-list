@@ -29,8 +29,8 @@ class EditNotePresenter @AssistedInject constructor(
         isReminderActive = originalNote?.isReminderActive ?: false
     )
 
-    override fun attachView(view: EditNoteView?) {
-        super.attachView(view)
+    override fun onFirstViewAttach() {
+        super.onFirstViewAttach()
         if (originalNote == null) {
             viewState.setToolbar(
                 isNewNote = true,
@@ -78,21 +78,25 @@ class EditNotePresenter @AssistedInject constructor(
     fun onBackButtonClicked() {
         if (originalNote != null) {
             if (note.text != originalNote.text || note.isReminderActive != originalNote.isReminderActive) {
-                viewState.showExitConfirmationDialog()
+                viewState.setExitConfirmationDialogState(true)
             } else {
                 viewState.goBack()
             }
         } else {
             if (note.text != DEFAULT_TEXT) {
-                viewState.showExitConfirmationDialog()
+                viewState.setExitConfirmationDialogState(true)
             } else {
                 viewState.goBack()
             }
         }
     }
 
-    fun onExitWithoutSavingConfirmed() {
-        viewState.goBack()
+    fun onExitWithoutSavingConfirmed(isConfirmed: Boolean) {
+        if (isConfirmed) {
+            viewState.goBack()
+        } else {
+            viewState.setExitConfirmationDialogState(false)
+        }
     }
 
     fun onSaveButtonClicked() {
