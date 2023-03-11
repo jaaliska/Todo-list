@@ -1,7 +1,7 @@
 package com.example.todo_list.domain.usecases
 
 import com.example.todo_list.domain.repository.NoteRepository
-import com.example.todo_list.presentation.ui.service.AlarmService
+import com.example.todo_list.presentation.ui.notification.AlarmService
 import io.reactivex.rxjava3.core.Completable
 import javax.inject.Inject
 

@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <application
         android:name=".app.TodoListApp"
         android:allowBackup="true"
@@ -25,7 +26,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".presentation.ui.service.AlertReceiver" />
+
+        <receiver android:name=".presentation.ui.notification.ReminderReceiver" />
+
+        <receiver android:name=".presentation.ui.notification.CompleteNoteReceiver" />
+
+        <service
+            android:name=".presentation.ui.notification.ReminderJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".presentation.ui.notification.CompleteNoteJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 
 </manifest>

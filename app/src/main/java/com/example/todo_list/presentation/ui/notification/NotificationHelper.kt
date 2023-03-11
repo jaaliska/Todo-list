@@ -1,71 +1,64 @@
-package com.example.todo_list.presentation.ui.service
+package com.example.todo_list.presentation.ui.notification
 
 
 import android.annotation.TargetApi
-import android.app.Notification
+import android.app.*
 import android.app.Notification.*
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import android.app.PendingIntent
 import android.content.Intent
 import com.example.todo_list.R
 import com.example.todo_list.domain.model.Note
 import com.example.todo_list.presentation.ui.MainActivity
+import com.example.todo_list.presentation.ui.notification.CompleteNoteReceiver.Companion.KEY_COMPLETE_NOTE_ID
 
 
-class NotificationHelper(base: Context?, note: Note) : ContextWrapper(base) {
+class NotificationHelper(base: Context?, private val note: Note) : ContextWrapper(base) {
 
-    private var mManager: NotificationManager? = null
-    private val contentText = StringBuffer()
-        .append(note.text.take(20))
-        .append("...")
+    val manager: NotificationManager by lazy {
+        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
 
+    init {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createChannel()
+        }
+    }
 
     @TargetApi(Build.VERSION_CODES.O)
     private fun createChannel() {
         val channel =
-            NotificationChannel(channelID, channelName, NotificationManager.IMPORTANCE_HIGH)
-        manager!!.createNotificationChannel(channel)
+            NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
+        manager.createNotificationChannel(channel)
     }
 
-    val manager: NotificationManager?
-        get() {
-            if (mManager == null) {
-                mManager =
-                    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            }
-            return mManager
-        }
-
     fun buildChannelNotification(): Notification {
-        val confirmIntent = Intent(applicationContext, ConfirmReceiver::class.java).apply {
-            // action = ACTION_SNOOZE
-            // putExtra(EXTRA_NOTIFICATION_ID, 0)
-        }
         val openAppIntent = Intent(applicationContext, MainActivity::class.java)
         val openAppPendingIntent: PendingIntent =
             PendingIntent.getActivity(
                 applicationContext,
-                0,
+                note.id,
                 openAppIntent,
                 PendingIntent.FLAG_IMMUTABLE
             )
 
+        val confirmIntent = Intent(applicationContext, CompleteNoteReceiver::class.java)
+            .putExtra(KEY_COMPLETE_NOTE_ID, note.id)
+
         val confirmPendingIntent: PendingIntent =
             PendingIntent.getBroadcast(
                 applicationContext,
-                0,
+                note.id,
                 confirmIntent,
                 PendingIntent.FLAG_IMMUTABLE
             )
-        return NotificationCompat.Builder(applicationContext, channelID)
+
+        return NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_bell)
             .setContentTitle(getString(R.string.notification_tittle))
-            .setContentText(contentText)
+            .setContentText(validateText(note.text))
             .setDefaults(DEFAULT_SOUND or DEFAULT_VIBRATE)
             .setCategory(CATEGORY_CALL)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -75,17 +68,24 @@ class NotificationHelper(base: Context?, note: Note) : ContextWrapper(base) {
                 getString(R.string.notification_complete),
                 confirmPendingIntent
             )
+            .setAutoCancel(true)
             .build()
     }
 
-    companion object {
-        const val channelID = "1"
-        const val channelName = "Notificationss"
+    private fun validateText(text: String): String {
+        return if (text.length > MAX_TEXT_LENGTH) {
+            StringBuffer()
+                .append(text.take(MAX_TEXT_LENGTH))
+                .append("...")
+                .toString()
+        } else {
+            text
+        }
     }
 
-    init {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createChannel()
-        }
+    companion object {
+        const val CHANNEL_ID = "1"
+        const val CHANNEL_NAME = "Reminder"
+        const val MAX_TEXT_LENGTH = 20
     }
 }

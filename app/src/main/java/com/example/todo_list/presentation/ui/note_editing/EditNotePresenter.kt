@@ -52,9 +52,14 @@ class EditNotePresenter @AssistedInject constructor(
             note.isReminderActive = !note.isReminderActive
             viewState.setReminderState(note.isReminderActive)
             updateNoteReminderState(
-                note.id ?: 1, //TODO
+                note.id!!, //TODO
                 note.isReminderActive
-            )
+            ).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError {
+                    viewState.showErrorToast()
+                }
+                .subscribeByPresenter()
         }
     }
 
@@ -80,7 +85,7 @@ class EditNotePresenter @AssistedInject constructor(
     }
 
     fun onSaveButtonClicked() {
-        if(originalNote == null) {
+        if (originalNote == null) {
             createNote(note.text, note.isReminderActive)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
