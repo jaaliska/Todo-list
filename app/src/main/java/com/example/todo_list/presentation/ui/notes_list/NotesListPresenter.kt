@@ -26,38 +26,32 @@ class NotesListPresenter @Inject constructor(
     )
     private val notesObserver = observeNotes()
 
-    private val completedNotes = notesObserver.observable.map { list ->
-        list.filter { it.isCompleted }
-    }
-    private val uncompletedNotes = notesObserver.observable.map { list ->
-        list.filter { !it.isCompleted }
-    }
-
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
 
         isCompletedNotesPanelOpen.subscribeByPresenter {
-            userPreferences.setShowCompletedNotes(it)
             viewState.setCompletedNotesPanelState(it)
         }
 
-        uncompletedNotes
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeByPresenter {
-                viewState.setUncompletedNotes(it.map(NoteItemMapper::map))
-            }
+        Observable.combineLatest(isCompletedNotesPanelOpen, notesObserver.observable) { isOpen, notes ->
+            val uncompleted = notes.filter { !it.isCompleted }.map(NoteItemMapper::map)
 
-        Observable.combineLatest(isCompletedNotesPanelOpen, completedNotes) { isOpen, notes ->
-            Pair(
-                if (isOpen) notes.map(NoteItemMapper::map) else listOf(),
-                notes.isNotEmpty()
-            )
+            val completed = if (isOpen)
+                notes.filter { it.isCompleted }.map(NoteItemMapper::map)
+            else
+                listOf()
+
+            val hasCompleted = if (isOpen)
+                completed.isNotEmpty()
+            else
+                notes.any { it.isCompleted }
+
+            Triple(uncompleted, completed, hasCompleted)
         }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeByPresenter {
-                viewState.setCompletedNotes(it.first, it.second)
+                viewState.setNotes(it.first, it.second, it.third)
             }
 
         refreshNotes(false)
@@ -73,7 +67,9 @@ class NotesListPresenter @Inject constructor(
     }
 
     fun onCompletedNotesPanelClicked() {
-        isCompletedNotesPanelOpen.onNext(!isCompletedNotesPanelOpen.value!!)
+        val nextState = !isCompletedNotesPanelOpen.value!!
+        userPreferences.setShowCompletedNotes(nextState)
+        isCompletedNotesPanelOpen.onNext(nextState)
     }
 
     fun onNoteClicked(id: Int) {
