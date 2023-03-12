@@ -8,13 +8,14 @@ import moxy.viewstate.strategy.alias.AddToEndSingle
 
 interface NotesListView: BaseMvpView {
     @AddToEndSingle
-    fun setUncompletedNotes(listItems: List<Item>)
-
-    @AddToEndSingle
-    fun setCompletedNotes(listItems: List<Item>, isThereCompletedNotes: Boolean)
-
-    @AddToEndSingle
     fun setCompletedNotesPanelState(isOpen: Boolean)
+
+    @AddToEndSingle
+    fun setNotes(
+        uncompleted: List<Item>,
+        completed: List<Item>,
+        isThereCompletedNotes: Boolean
+    )
 
     @StateStrategyType(OneExecutionStateStrategy::class)
     fun goToEditNoteScreen(note: Note?)

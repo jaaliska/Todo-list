@@ -1,5 +1,6 @@
 package com.example.todo_list.data.repository
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.example.todo_list.data.dao.NoteDao
 import com.example.todo_list.data.mappers.DbModelMapper
@@ -69,6 +70,7 @@ class CachedNotesRepository @Inject constructor(
             .ignoreElement()
     }
 
+    @SuppressLint("CheckResult")
     override fun update(
         id: Int,
         text: String?,
@@ -86,8 +88,9 @@ class CachedNotesRepository @Inject constructor(
             )
             cache.subject.onNext(tree)
 
-            return updateByIdInDb(id, text, isCompleted, isCompleted)
-                .doOnError {
+            updateByIdInDb(id, text, isCompleted, isReminderActive)
+                .subscribeOn(Schedulers.io())
+                .subscribe({}) {
                     Log.e("CachedNotesRepository", "error updating note $id: $it")
                     cache.update { tree ->
                         // rollback on error
@@ -95,13 +98,15 @@ class CachedNotesRepository @Inject constructor(
                         tree
                     }
                 }
+            return Completable.complete()
         }
 
-        return updateByIdInDb(id, text, isCompleted, isCompleted).doOnComplete {
+        return updateByIdInDb(id, text, isCompleted, isReminderActive).doOnComplete {
             cache.startLoading(true)
         }
     }
 
+    @SuppressLint("CheckResult")
     override fun deleteNote(id: Int): Completable {
         val tree = cache.subject.value
         val note = tree?.get(id)
@@ -109,8 +114,9 @@ class CachedNotesRepository @Inject constructor(
             tree.remove(id)
             cache.subject.onNext(tree)
 
-            return db.delete(id)
-                .doOnError {
+            db.delete(id)
+                .subscribeOn(Schedulers.io())
+                .subscribe({}) {
                     Log.e("CachedNotesRepository", "error deleting note $id: $it")
                     // rollback on error
                     cache.update { tree ->
@@ -118,6 +124,7 @@ class CachedNotesRepository @Inject constructor(
                         tree
                     }
                 }
+            return Completable.complete()
         }
 
         return db.delete(id).doOnComplete {

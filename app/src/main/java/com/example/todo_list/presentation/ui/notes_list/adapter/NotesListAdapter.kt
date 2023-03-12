@@ -36,7 +36,10 @@ class NotesListAdapter(
             }
             binding.checkbox.apply {
                 isChecked = item.isChecked
-                setOnClickListener { onCheckboxClick(item, !item.isChecked) }
+                setOnClickListener {
+                    isChecked = !isChecked
+                    onCheckboxClick(item, !item.isChecked)
+                }
             }
         }
     }

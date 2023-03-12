@@ -32,7 +32,6 @@ class NotesListScreen : BaseFragment(), NotesListView {
     private var _binding: FragmentNotesListBinding? = null
     private val binding get() = _binding!!
 
-    private var isThereCompletedNotes: Boolean = false
     private lateinit var completedNotesView: ListCustomView<NotesListView.Item>
     private lateinit var uncompletedNotesListAdapter: NotesListAdapter
 
@@ -70,18 +69,17 @@ class NotesListScreen : BaseFragment(), NotesListView {
         }
     }
 
-    override fun setUncompletedNotes(listItems: List<NotesListView.Item>) {
-        uncompletedNotesListAdapter.submitList(listItems)
-        updateNoNotesPromptVisibility()
-    }
-
-    override fun setCompletedNotes(
-        listItems: List<NotesListView.Item>, isThereCompletedNotes: Boolean
+    override fun setNotes(
+        uncompleted: List<NotesListView.Item>,
+        completed: List<NotesListView.Item>,
+        // For the case when completed notes panel is hidden
+        isThereCompletedNotes: Boolean
     ) {
-        this.isThereCompletedNotes = isThereCompletedNotes
+        uncompletedNotesListAdapter.submitList(uncompleted)
         binding.completedNotesContainer.isVisible = isThereCompletedNotes
-        completedNotesView.submitList(listItems)
-        updateNoNotesPromptVisibility()
+        completedNotesView.submitList(completed)
+        binding.noNotesPrompt.isVisible =
+            !isThereCompletedNotes && uncompleted.isEmpty()
     }
 
     override fun setCompletedNotesPanelState(isOpen: Boolean) {
@@ -97,11 +95,6 @@ class NotesListScreen : BaseFragment(), NotesListView {
         { item -> presenter.onNoteClicked(item.id) },
         { item, isChecked -> presenter.onNoteCheckboxClicked(item.id, isChecked) }
     )
-
-    private fun updateNoNotesPromptVisibility() {
-        binding.noNotesPrompt.isVisible =
-            !isThereCompletedNotes && uncompletedNotesListAdapter.itemCount == 0
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
