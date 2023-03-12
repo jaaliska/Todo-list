@@ -20,17 +20,11 @@ interface NoteDao {
     @Query("SELECT * FROM note")
     fun getAll(): Single<List<RoomNote>>
 
-    @Query("SELECT * FROM note WHERE isCompleted = :completed")
-    fun getAllByCompletionStatus(completed: Boolean): Single<List<RoomNote>>
-
-    @Query("SELECT EXISTS(SELECT id FROM note WHERE isCompleted)")
-    fun hasCompletedNotes(): Single<Boolean>
-
     @Query("UPDATE note SET text = :text WHERE id = :id")
     fun updateText(id: Int, text: String): Completable
 
     @Query("UPDATE note SET isCompleted = :isCompleted WHERE id = :id")
-    fun updateCompleteState(id: Int, isCompleted: Boolean): Completable
+    fun updateCompletionState(id: Int, isCompleted: Boolean): Completable
 
     @Query("UPDATE note SET isReminderActive = :isReminderActive WHERE id = :id")
     fun updateReminderState(id: Int, isReminderActive: Boolean): Completable

@@ -14,4 +14,7 @@ interface BaseMvpView : MvpView {
 
     @OneExecution
     fun showErrorToast(error: String? = null)
+
+    @OneExecution
+    fun showErrorToast(errorRes: Int)
 }

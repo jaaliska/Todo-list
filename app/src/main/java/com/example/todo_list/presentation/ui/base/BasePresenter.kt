@@ -27,34 +27,48 @@ open class BasePresenter<T : MvpView> : MvpPresenter<T>() {
         onError: (Throwable) -> Unit = {},
         onSuccess: (T) -> Unit = {},
     ): Disposable {
-        return this
+        lateinit var disposable: Disposable
+        disposable = this
+            .doAfterTerminate { lifecycleDisposables.remove(disposable) }
             .subscribe(onSuccess, onError)
             .bindToLifecycle()
+        return disposable
     }
 
     fun <T : Any> Maybe<T>.subscribeByPresenter(
         onError: (Throwable) -> Unit = {},
         onSuccess: (T) -> Unit = {},
     ): Disposable {
-        return this
+        lateinit var disposable: Disposable
+        disposable = this
+            .doAfterTerminate { lifecycleDisposables.remove(disposable) }
             .subscribe(onSuccess, onError)
             .bindToLifecycle()
+        return disposable
     }
 
     fun Completable.subscribeByPresenter(
         onError: (Throwable) -> Unit = {},
         onComplete: () -> Unit = {},
     ): Disposable {
-        return this.subscribe(onComplete, onError)
+        lateinit var disposable: Disposable
+        disposable = this
+            .doAfterTerminate { lifecycleDisposables.remove(disposable) }
+            .subscribe(onComplete, onError)
             .bindToLifecycle()
+        return disposable
     }
 
     fun <T : Any> Observable<T>.subscribeByPresenter(
         onError: (Throwable) -> Unit = {},
         onNext: (T) -> Unit = {}
     ): Disposable {
-        return this.subscribe(onNext, onError)
+        lateinit var disposable: Disposable
+        disposable = this
+            .doAfterTerminate { lifecycleDisposables.remove(disposable) }
+            .subscribe(onNext, onError)
             .bindToLifecycle()
+        return disposable
     }
 
 }

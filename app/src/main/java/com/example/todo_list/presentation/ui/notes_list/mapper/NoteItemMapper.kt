@@ -1,6 +1,7 @@
-package com.example.todo_list.presentation.ui.notes_list
+package com.example.todo_list.presentation.ui.notes_list.mapper
 
 import com.example.todo_list.domain.model.Note
+import com.example.todo_list.presentation.ui.notes_list.NotesListView
 
 object NoteItemMapper {
 

@@ -7,7 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.PersistableBundle
-import com.example.todo_list.domain.usecases.UpdateNoteCompleteStateUseCase
+import com.example.todo_list.domain.usecases.UpdateNoteCompletionStateUseCase
 import dagger.android.AndroidInjection
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -15,7 +15,7 @@ import javax.inject.Inject
 class CompleteNoteReceiver : BroadcastReceiver() {
 
     @Inject
-    lateinit var updateNoteCompleteState: UpdateNoteCompleteStateUseCase
+    lateinit var updateNoteCompleteState: UpdateNoteCompletionStateUseCase
 
     override fun onReceive(context: Context, intent: Intent) {
         AndroidInjection.inject(this, context)

@@ -6,24 +6,24 @@ import android.app.job.JobService
 import android.content.ContextWrapper
 import android.widget.Toast
 import com.example.todo_list.app.TodoListApp
-import com.example.todo_list.domain.usecases.UpdateNoteCompleteStateUseCase
+import com.example.todo_list.domain.usecases.UpdateNoteCompletionStateUseCase
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
 
 class CompleteNoteJobService : JobService() {
 
     @Inject
-    lateinit var updateNoteCompleteState: UpdateNoteCompleteStateUseCase
-    private val compositeDisposable = CompositeDisposable()
+    lateinit var updateNoteCompletionState: UpdateNoteCompletionStateUseCase
+    lateinit var disposable: Disposable
 
     override fun onStartJob(params: JobParameters): Boolean {
         TodoListApp.appComponent.inject(this)
 
         val noteId = params.extras.getInt(KEY_COMPLETE_NOTE_ID, CompleteNoteReceiver.DEFAULT_VALUE)
-        val disposable =
-            updateNoteCompleteState(noteId, true)
+        disposable =
+            updateNoteCompletionState(noteId, true)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnError {
@@ -37,7 +37,6 @@ class CompleteNoteJobService : JobService() {
                     jobFinished(params, false)
                 }
                 .subscribe()
-        compositeDisposable.add(disposable)
         return true
     }
 
@@ -46,7 +45,7 @@ class CompleteNoteJobService : JobService() {
     }
 
     override fun onDestroy() {
-        compositeDisposable.dispose()
+        disposable.dispose()
         super.onDestroy()
     }
 

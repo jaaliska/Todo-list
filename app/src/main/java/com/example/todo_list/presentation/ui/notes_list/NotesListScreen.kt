@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
@@ -14,10 +13,10 @@ import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.databinding.FragmentNotesListBinding
 import com.example.todo_list.domain.model.Note
 import com.example.todo_list.presentation.ui.base.BaseFragment
+import com.example.todo_list.presentation.ui.note_editing.EditNoteScreen
 import com.example.todo_list.presentation.ui.notes_list.adapter.NotesListAdapter
 import com.example.todo_list.presentation.ui.notes_list.view.FoldingListView
 import com.example.todo_list.presentation.ui.notes_list.view.ListCustomView
-import com.example.todo_list.presentation.utils.ui_kit.ProgressDialog
 import moxy.ktx.moxyPresenter
 import javax.inject.Inject
 import javax.inject.Provider
@@ -90,21 +89,8 @@ class NotesListScreen : BaseFragment(), NotesListView {
     }
 
     override fun goToEditNoteScreen(note: Note?) {
-        val bundle = bundleOf("note" to note)
+        val bundle = bundleOf(EditNoteScreen.KEY_NOTE to note)
         findNavController().navigate(R.id.action_NotesListScreen_to_EditNoteScreen, bundle)
-    }
-
-    override fun showProgressDialog() {
-        ProgressDialog.showProgress(requireContext())
-    }
-
-    override fun hideProgressDialog() {
-        ProgressDialog.hideProgress()
-    }
-
-    override fun showErrorToast(error: String?) {
-        val message = error ?: getString(R.string.something_went_wrong)
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun createListAdapter() = NotesListAdapter(
@@ -119,7 +105,6 @@ class NotesListScreen : BaseFragment(), NotesListView {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        ProgressDialog.hideProgress()
         _binding = null
     }
 }

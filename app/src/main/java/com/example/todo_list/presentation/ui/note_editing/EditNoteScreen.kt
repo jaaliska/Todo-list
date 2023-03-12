@@ -1,12 +1,12 @@
 package com.example.todo_list.presentation.ui.note_editing
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
@@ -15,7 +15,6 @@ import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.app.di.factory.EditNotePresenterFactory
 import com.example.todo_list.databinding.FragmentEditNoteBinding
 import com.example.todo_list.presentation.ui.base.BaseFragment
-import com.example.todo_list.presentation.utils.ui_kit.ProgressDialog
 import moxy.ktx.moxyPresenter
 import javax.inject.Inject
 
@@ -25,13 +24,13 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
     lateinit var presenterFactory: EditNotePresenterFactory
     private val presenter by moxyPresenter<EditNotePresenter> {
         presenterFactory.create(
-            arguments?.getParcelable("note")
+            arguments?.getParcelable(KEY_NOTE)
         )
     }
 
     private var _binding: FragmentEditNoteBinding? = null
     private val binding get() = _binding!!
-    private val progress = ProgressDialog
+    private var exitConfirmationDialog: AlertDialog? = null
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -53,7 +52,7 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.fab.setOnClickListener { _ ->
+        binding.fab.setOnClickListener {
             presenter.onSaveButtonClicked()
         }
 
@@ -62,6 +61,7 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 presenter.onTextChanged(s.toString())
             }
+
             override fun afterTextChanged(s: Editable?) {}
         })
     }
@@ -75,7 +75,7 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
             menu.clear()
             inflateMenu(R.menu.menu_main)
             setNavigationIcon(R.drawable.ic_left_arrow)
-            setNavigationOnClickListener { _ -> goBack() }
+            setNavigationOnClickListener { presenter.onBackButtonClicked() }
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.action_bell -> {
@@ -99,6 +99,27 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
         }
     }
 
+    override fun showExitConfirmationDialog() {
+        exitConfirmationDialog =
+            AlertDialog.Builder(context)
+                .setTitle(R.string.edit_note_dialog_tittle)
+                .setMessage(R.string.edit_note_dialog_message)
+                .setPositiveButton(R.string.yes) { _, _ ->
+                    presenter.onExitWithoutSavingConfirmed(true)
+                }
+                .setNegativeButton(R.string.cancel) { _, _ ->
+                    presenter.onExitWithoutSavingConfirmed(false)
+                }
+                .show()
+    }
+
+    override fun hideExitConfirmationDialog() {
+        if (exitConfirmationDialog != null) {
+            exitConfirmationDialog!!.dismiss()
+            exitConfirmationDialog = null
+        }
+    }
+
     override fun setText(text: String) {
         val currentText = binding.editText.text.toString()
         if (text != currentText) {
@@ -114,9 +135,10 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
 
     override fun requestNotificationPermission() {
         if (ContextCompat.checkSelfPermission(
-            requireContext(),
-            TodoListApp.PERMISSION_POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED) {
+                requireContext(),
+                TodoListApp.PERMISSION_POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             presenter.onNotificationPermissionRequestResult(true)
         } else {
             requestPermissionLauncher.launch(TodoListApp.PERMISSION_POST_NOTIFICATIONS)
@@ -127,22 +149,17 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
         findNavController().popBackStack()
     }
 
-    override fun showProgressDialog() {
-        progress.showProgress(requireContext())
-    }
-
-    override fun hideProgressDialog() {
-        progress.hideProgress()
-    }
-
-    override fun showErrorToast(error: String?) {
-        val message = error ?: getString(R.string.something_went_wrong)
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
+        if (exitConfirmationDialog != null) {
+            exitConfirmationDialog?.dismiss()
+            exitConfirmationDialog = null
+        }
         _binding = null
+    }
+
+    companion object {
+        const val KEY_NOTE = "note"
     }
 
 }
