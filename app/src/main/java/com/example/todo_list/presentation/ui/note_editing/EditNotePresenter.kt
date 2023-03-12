@@ -24,13 +24,13 @@ class EditNotePresenter @AssistedInject constructor(
 
     private val note: EditableNote = EditableNote(
         id = originalNote?.id,
-        text = originalNote?.text ?: "",
+        text = originalNote?.text ?: DEFAULT_TEXT,
         isCompleted = originalNote?.isCompleted ?: false,
         isReminderActive = originalNote?.isReminderActive ?: false
     )
 
-    override fun attachView(view: EditNoteView?) {
-        super.attachView(view)
+    override fun onFirstViewAttach() {
+        super.onFirstViewAttach()
         if (originalNote == null) {
             viewState.setToolbar(
                 isNewNote = true,
@@ -47,22 +47,6 @@ class EditNotePresenter @AssistedInject constructor(
         }
     }
 
-    fun onNotificationPermissionRequestResult(granted: Boolean) {
-        if (granted) {
-            note.isReminderActive = !note.isReminderActive
-            viewState.setReminderState(note.isReminderActive)
-            updateNoteReminderState(
-                note.id!!, //TODO
-                note.isReminderActive
-            ).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError {
-                    viewState.showErrorToast()
-                }
-                .subscribeByPresenter()
-        }
-    }
-
     fun onTextChanged(text: String) {
         note.text = text
         viewState.setText(text)
@@ -70,6 +54,13 @@ class EditNotePresenter @AssistedInject constructor(
 
     fun onReminderClicked() {
         viewState.requestNotificationPermission()
+    }
+
+    fun onNotificationPermissionRequestResult(granted: Boolean) {
+        if (granted) {
+            note.isReminderActive = !note.isReminderActive
+            viewState.setReminderState(note.isReminderActive)
+        }
     }
 
     fun onDeleteButtonClicked() {
@@ -84,29 +75,77 @@ class EditNotePresenter @AssistedInject constructor(
             }
     }
 
-    fun onSaveButtonClicked() {
-        if (originalNote == null) {
-            createNote(note.text, note.isReminderActive)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnError {
-                    viewState.showErrorToast()
-                }
-                .subscribeByPresenter {
-                    viewState.goBack()
-                }
+    fun onBackButtonClicked() {
+        if (originalNote != null) {
+            if (note.text != originalNote.text || note.isReminderActive != originalNote.isReminderActive) {
+                viewState.setExitConfirmationDialogState(true)
+            } else {
+                viewState.goBack()
+            }
         } else {
-            if (note.text != originalNote.text) {
-                updateNoteText(originalNote.id, note.text)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnError {
-                        viewState.showErrorToast()
-                    }
-                    .subscribeByPresenter {
-                        viewState.goBack()
-                    }
+            if (note.text != DEFAULT_TEXT) {
+                viewState.setExitConfirmationDialogState(true)
+            } else {
+                viewState.goBack()
             }
         }
+    }
+
+    fun onExitWithoutSavingConfirmed(isConfirmed: Boolean) {
+        if (isConfirmed) {
+            viewState.goBack()
+        } else {
+            viewState.setExitConfirmationDialogState(false)
+        }
+    }
+
+    fun onSaveButtonClicked() {
+        if (originalNote == null) {
+            createNewNote()
+        } else {
+            if (note.text != originalNote.text) {
+                updateNoteText()
+            }
+            if (note.isReminderActive != originalNote.isReminderActive) {
+                updateNoteReminderState()
+            }
+        }
+        viewState.goBack()
+    }
+
+    private fun createNewNote() {
+        createNote(note.text, note.isReminderActive)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnError {
+                viewState.showErrorToast()
+            }
+            .subscribeByPresenter {
+                viewState.goBack()
+            }
+    }
+
+    private fun updateNoteText() {
+        updateNoteText(originalNote!!.id, note.text)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnError {
+                viewState.showErrorToast()
+            }
+            .subscribeByPresenter()
+    }
+
+    private fun updateNoteReminderState() {
+        updateNoteReminderState(originalNote!!.id, note.isReminderActive)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnError {
+                viewState.showErrorToast()
+            }
+            .subscribeByPresenter()
+    }
+
+    companion object {
+        const val DEFAULT_TEXT = ""
     }
 }

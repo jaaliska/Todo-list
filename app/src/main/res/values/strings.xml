@@ -15,6 +15,11 @@
     <string name="autofill_edit_text">Текст заметки</string>
     <string name="edit_note_tittle">Заметка</string>
     <string name="new_note_tittle">Новая заметка</string>
+    <string name="yes">Да</string>
+    <string name="cancel">Отменить</string>
+    <string name="edit_note_dialog_tittle">Вы уверены, что хотите выйти?</string>
+    <string name="edit_note_dialog_message">Изменения не сохранятся.</string>
+
 
     <!-- Notification -->
     <string name="notification_tittle">Напоминание</string>

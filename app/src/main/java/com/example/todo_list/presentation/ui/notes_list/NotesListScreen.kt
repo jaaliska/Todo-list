@@ -13,6 +13,7 @@ import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.databinding.FragmentNotesListBinding
 import com.example.todo_list.domain.model.Note
 import com.example.todo_list.presentation.ui.base.BaseFragment
+import com.example.todo_list.presentation.ui.note_editing.EditNoteScreen
 import com.example.todo_list.presentation.ui.notes_list.adapter.NotesListAdapter
 import com.example.todo_list.presentation.ui.notes_list.view.FoldingListView
 import com.example.todo_list.presentation.ui.notes_list.view.ListCustomView
@@ -89,7 +90,7 @@ class NotesListScreen : BaseFragment(), NotesListView {
     }
 
     override fun goToEditNoteScreen(note: Note?) {
-        val bundle = bundleOf("note" to note)
+        val bundle = bundleOf(EditNoteScreen.KEY_NOTE to note)
         findNavController().navigate(R.id.action_NotesListScreen_to_EditNoteScreen, bundle)
     }
 
