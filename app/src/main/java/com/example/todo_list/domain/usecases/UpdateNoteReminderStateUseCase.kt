@@ -6,16 +6,16 @@ import io.reactivex.rxjava3.core.Completable
 import javax.inject.Inject
 
 class UpdateNoteReminderStateUseCase @Inject constructor(
-    private val repository: NotesRepository
+    private val notesRepository: NotesRepository,
+    private val alarmService: AlarmService
 ) {
 
     operator fun invoke(noteId: Int, isReminderActive: Boolean): Completable {
-
         if (isReminderActive) {
-            AlarmService().startAlarm(noteId)
+            alarmService.startAlarm(noteId)
         } else {
-            AlarmService().cancelAlarm(noteId)
+            alarmService.cancelAlarm(noteId)
         }
-        return repository.update(noteId, isReminderActive = isReminderActive)
+        return notesRepository.update(noteId, isReminderActive = isReminderActive)
     }
 }

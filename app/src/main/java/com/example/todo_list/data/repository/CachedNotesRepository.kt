@@ -88,7 +88,7 @@ class CachedNotesRepository @Inject constructor(
             )
             cache.subject.onNext(tree)
 
-            updateByIdInDb(id, text, isCompleted, isCompleted)
+            updateByIdInDb(id, text, isCompleted, isReminderActive)
                 .subscribeOn(Schedulers.io())
                 .subscribe({}) {
                     Log.e("CachedNotesRepository", "error updating note $id: $it")
@@ -101,7 +101,7 @@ class CachedNotesRepository @Inject constructor(
             return Completable.complete()
         }
 
-        return updateByIdInDb(id, text, isCompleted, isCompleted).doOnComplete {
+        return updateByIdInDb(id, text, isCompleted, isReminderActive).doOnComplete {
             cache.startLoading(true)
         }
     }

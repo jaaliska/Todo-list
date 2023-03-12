@@ -7,8 +7,9 @@ import androidx.core.content.ContextCompat
 import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.presentation.ui.notification.ReminderReceiver.Companion.KEY_REMINDER_NOTE_ID
 import java.util.*
+import javax.inject.Inject
 
-class AlarmService {
+class AlarmService @Inject constructor() {
 
     val context = TodoListApp.appComponent.context()
 
@@ -31,7 +32,7 @@ class AlarmService {
     }
 
     companion object {
-        private const val TEN_MINUTES_IN_MILLIS = 2000//10 * 60 * 1000
+        private const val TEN_MINUTES_IN_MILLIS = 10 * 60 * 1000
     }
 
 }
