@@ -6,7 +6,7 @@ import com.example.todo_list.data.mappers.DbModelMapper
 import com.example.todo_list.data.model.RoomNote
 import com.example.todo_list.domain.model.Note
 import com.example.todo_list.domain.repository.NotesRepository
-import com.example.todo_list.domain.repository.TriggeredObservable
+import com.example.todo_list.domain.model.TriggeredObservable
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 class CachedNotesRepository @Inject constructor(
     private val db: NoteDao
-): NotesRepository {
+) : NotesRepository {
 
     private val cache = TriggeredSubject.create(this::loadAllFromDb) {
         it.values.toList()
@@ -25,7 +25,7 @@ class CachedNotesRepository @Inject constructor(
     override fun getById(id: Int): Single<Note> {
         val found = cache.subject.value?.get(id)
         if (found != null) {
-             return Single.just(found)
+            return Single.just(found)
         }
         return loadByIdFromDb(id)
     }
@@ -56,8 +56,8 @@ class CachedNotesRepository @Inject constructor(
             isReminderActive = isReminderActive,
             isCompleted = false,
         )
-        return Completable.fromSingle(db.save(roomNote)
-            .doOnSuccess { id ->
+        return db.save(roomNote)
+            .flatMapCompletable { id ->
                 cache.update {
                     it[id.toInt()] = Note(id.toInt(), text, false, isReminderActive)
                     it
@@ -65,7 +65,6 @@ class CachedNotesRepository @Inject constructor(
             .doOnError {
                 Log.e("CachedNotesRepository", "error creating '$text' note: $it")
             }
-        )
     }
 
     override fun update(
@@ -134,9 +133,9 @@ class CachedNotesRepository @Inject constructor(
 
     private fun updateByIdInDb(
         id: Int,
-       text: String?,
-       isCompleted: Boolean?,
-       isReminderActive: Boolean?
+        text: String?,
+        isCompleted: Boolean?,
+        isReminderActive: Boolean?
     ): Completable {
         val actions = mutableListOf<Completable>()
         if (text != null) {

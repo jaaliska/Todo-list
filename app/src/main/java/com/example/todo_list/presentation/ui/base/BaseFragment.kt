@@ -7,12 +7,14 @@ import moxy.MvpAppCompatFragment
 
 open class BaseFragment : MvpAppCompatFragment(), BaseMvpView {
 
+    private val progressDialog = ProgressDialog()
+
     override fun showProgressDialog() {
-        ProgressDialog.showProgress(requireContext())
+        progressDialog.showProgress(requireContext())
     }
 
     override fun hideProgressDialog() {
-        ProgressDialog.hideProgress()
+        progressDialog.hideProgress()
     }
 
     override fun showErrorToast(error: String?) {

@@ -1,8 +1,11 @@
 package com.example.todo_list.presentation.ui.notes_list
 
-import com.example.todo_list.data.repository.UserPreferencesRepository
-import com.example.todo_list.domain.repository.NotesRepository
+import com.example.todo_list.domain.repository.PreferencesRepository
+import com.example.todo_list.domain.usecases.GetNoteByIdUseCase
+import com.example.todo_list.domain.usecases.ObserveNotesUseCase
+import com.example.todo_list.domain.usecases.UpdateNoteCompleteStateUseCase
 import com.example.todo_list.presentation.ui.base.BasePresenter
+import com.example.todo_list.presentation.ui.notes_list.mapper.NoteItemMapper
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -12,20 +15,22 @@ import javax.inject.Inject
 
 @InjectViewState
 class NotesListPresenter @Inject constructor(
-    private val userPreferences: UserPreferencesRepository,
-    private val notesRepository: NotesRepository
+    private val userPreferences: PreferencesRepository,
+    observeNotes: ObserveNotesUseCase,
+    private val getNoteById: GetNoteByIdUseCase,
+    private val updateNoteCompleteState: UpdateNoteCompleteStateUseCase,
 ) : BasePresenter<NotesListView>() {
 
     private var isCompletedNotesPanelOpen = BehaviorSubject.createDefault(
         userPreferences.isShowCompletedNotes()
     )
-    private val notesObserver = notesRepository.observeAll()
+    private val notesObserver = observeNotes()
 
-    private val completedNotes = notesObserver.observable.map {
-            list -> list.filter { it.isCompleted }
+    private val completedNotes = notesObserver.observable.map { list ->
+        list.filter { it.isCompleted }
     }
-    private val uncompletedNotes = notesObserver.observable.map {
-            list -> list.filter { !it.isCompleted }
+    private val uncompletedNotes = notesObserver.observable.map { list ->
+        list.filter { !it.isCompleted }
     }
 
     override fun onFirstViewAttach() {
@@ -47,7 +52,8 @@ class NotesListPresenter @Inject constructor(
             Pair(
                 if (isOpen) notes.map(NoteItemMapper::map) else listOf(),
                 notes.isNotEmpty()
-            )}
+            )
+        }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeByPresenter {
@@ -58,7 +64,7 @@ class NotesListPresenter @Inject constructor(
     }
 
     fun onNoteCheckboxClicked(id: Int, isChecked: Boolean) {
-        notesRepository.update(id, isCompleted = isChecked)
+        updateNoteCompleteState(id, isCompleted = isChecked)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeByPresenter({
@@ -71,7 +77,7 @@ class NotesListPresenter @Inject constructor(
     }
 
     fun onNoteClicked(id: Int) {
-        notesRepository.getById(id)
+        getNoteById(id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeByPresenter({
@@ -86,11 +92,11 @@ class NotesListPresenter @Inject constructor(
     }
 
     private fun refreshNotes(forceRefresh: Boolean) {
-        viewState.showProgressDialog()
         notesObserver.startLoading(forceRefresh)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doFinally(viewState::hideProgressDialog)
+            .doOnSubscribe { viewState.showProgressDialog() }
+            .doFinally { viewState.hideProgressDialog() }
             .subscribeByPresenter({
                 viewState.showErrorToast()
             })

@@ -1,7 +1,7 @@
 package com.example.todo_list.data.repository
 
 import android.util.Log
-import com.example.todo_list.domain.repository.TriggeredObservable
+import com.example.todo_list.domain.model.TriggeredObservable
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single

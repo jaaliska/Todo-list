@@ -1,4 +1,4 @@
-package com.example.todo_list.domain.repository
+package com.example.todo_list.domain.model
 
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable

@@ -1,6 +1,7 @@
 package com.example.todo_list.domain.repository
 
 import com.example.todo_list.domain.model.Note
+import com.example.todo_list.domain.model.TriggeredObservable
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 

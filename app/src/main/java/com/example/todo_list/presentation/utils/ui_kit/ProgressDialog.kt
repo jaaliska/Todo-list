@@ -6,12 +6,10 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import com.example.todo_list.R
 
-object ProgressDialog {
+class ProgressDialog {
     private var dialog: Dialog? = null
-    private var numberOfUsers: Int = 0
 
     fun showProgress(context: Context, cancelable: Boolean = false) {
-        numberOfUsers += 1
         if (dialog != null) return
         dialog = createDialog(context, cancelable)
     }
@@ -27,12 +25,9 @@ object ProgressDialog {
     }
 
     fun hideProgress() {
-        numberOfUsers -= 1
-        if (numberOfUsers == 0) {
-            dialog?.run {
-                dialog = null
-                dismiss()
-            }
+        dialog?.run {
+            dialog = null
+            dismiss()
         }
     }
 }

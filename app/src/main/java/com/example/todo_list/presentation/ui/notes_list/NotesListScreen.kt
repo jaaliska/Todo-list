@@ -17,7 +17,6 @@ import com.example.todo_list.presentation.ui.note_editing.EditNoteScreen
 import com.example.todo_list.presentation.ui.notes_list.adapter.NotesListAdapter
 import com.example.todo_list.presentation.ui.notes_list.view.FoldingListView
 import com.example.todo_list.presentation.ui.notes_list.view.ListCustomView
-import com.example.todo_list.presentation.utils.ui_kit.ProgressDialog
 import moxy.ktx.moxyPresenter
 import javax.inject.Inject
 import javax.inject.Provider
@@ -106,7 +105,6 @@ class NotesListScreen : BaseFragment(), NotesListView {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        ProgressDialog.hideProgress()
         _binding = null
     }
 }

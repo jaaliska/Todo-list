@@ -10,6 +10,7 @@ import com.example.todo_list.presentation.ui.base.BasePresenter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import moxy.InjectViewState
 
@@ -67,9 +68,11 @@ class EditNotePresenter @AssistedInject constructor(
         deleteNote(originalNote!!.id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { viewState.showProgressDialog() }
             .doOnError {
                 viewState.showErrorToast()
             }
+            .doFinally { viewState.hideProgressDialog() }
             .subscribeByPresenter {
                 viewState.goBack()
             }
@@ -100,49 +103,29 @@ class EditNotePresenter @AssistedInject constructor(
     }
 
     fun onSaveButtonClicked() {
-        if (originalNote == null) {
-            createNewNote()
-        } else {
-            if (note.text != originalNote.text) {
-                updateNoteText()
-            }
-            if (note.isReminderActive != originalNote.isReminderActive) {
-                updateNoteReminderState()
-            }
-        }
-        viewState.goBack()
-    }
+        Completable.merge(listOfNotNull(
+            if (originalNote == null)
+                createNote(note.text, note.isReminderActive)
+            else null,
 
-    private fun createNewNote() {
-        createNote(note.text, note.isReminderActive)
+            if (originalNote !== null && note.text != originalNote.text)
+                updateNoteText(originalNote.id, note.text)
+            else null,
+
+            if (originalNote !== null && note.isReminderActive != originalNote.isReminderActive)
+                updateNoteReminderState(originalNote.id, note.isReminderActive)
+            else null
+        ))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { viewState.showProgressDialog() }
             .doOnError {
                 viewState.showErrorToast()
             }
+            .doFinally {  viewState.hideProgressDialog() }
             .subscribeByPresenter {
                 viewState.goBack()
             }
-    }
-
-    private fun updateNoteText() {
-        updateNoteText(originalNote!!.id, note.text)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnError {
-                viewState.showErrorToast()
-            }
-            .subscribeByPresenter()
-    }
-
-    private fun updateNoteReminderState() {
-        updateNoteReminderState(originalNote!!.id, note.isReminderActive)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnError {
-                viewState.showErrorToast()
-            }
-            .subscribeByPresenter()
     }
 
     companion object {

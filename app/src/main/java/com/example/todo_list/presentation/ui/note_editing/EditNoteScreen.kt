@@ -15,7 +15,6 @@ import com.example.todo_list.app.TodoListApp
 import com.example.todo_list.app.di.factory.EditNotePresenterFactory
 import com.example.todo_list.databinding.FragmentEditNoteBinding
 import com.example.todo_list.presentation.ui.base.BaseFragment
-import com.example.todo_list.presentation.utils.ui_kit.ProgressDialog
 import moxy.ktx.moxyPresenter
 import javax.inject.Inject
 
@@ -31,7 +30,6 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
 
     private var _binding: FragmentEditNoteBinding? = null
     private val binding get() = _binding!!
-    private val progress = ProgressDialog
     private var exitConfirmationDialog: AlertDialog? = null
 
     private val requestPermissionLauncher =
@@ -54,7 +52,7 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.fab.setOnClickListener { _ ->
+        binding.fab.setOnClickListener {
             presenter.onSaveButtonClicked()
         }
 
