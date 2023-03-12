@@ -21,4 +21,8 @@ open class BaseFragment : MvpAppCompatFragment(), BaseMvpView {
         val message = error ?: getString(R.string.something_went_wrong)
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
+
+    override fun showErrorToast(errorRes: Int) {
+        Toast.makeText(context, getString(errorRes), Toast.LENGTH_SHORT).show()
+    }
 }

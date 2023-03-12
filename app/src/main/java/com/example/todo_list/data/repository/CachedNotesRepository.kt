@@ -57,14 +57,16 @@ class CachedNotesRepository @Inject constructor(
             isCompleted = false,
         )
         return db.save(roomNote)
-            .flatMapCompletable { id ->
+            .doOnSuccess { id ->
                 cache.update {
                     it[id.toInt()] = Note(id.toInt(), text, false, isReminderActive)
                     it
-                }}
+                }
+            }
             .doOnError {
                 Log.e("CachedNotesRepository", "error creating '$text' note: $it")
             }
+            .ignoreElement()
     }
 
     override fun update(

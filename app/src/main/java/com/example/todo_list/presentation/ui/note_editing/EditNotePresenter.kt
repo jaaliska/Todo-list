@@ -1,10 +1,8 @@
 package com.example.todo_list.presentation.ui.note_editing
 
+import com.example.todo_list.R
 import com.example.todo_list.domain.model.Note
-import com.example.todo_list.domain.usecases.CreateNoteUseCase
-import com.example.todo_list.domain.usecases.DeleteNoteUseCase
-import com.example.todo_list.domain.usecases.UpdateNoteReminderStateUseCase
-import com.example.todo_list.domain.usecases.UpdateNoteTextUseCase
+import com.example.todo_list.domain.usecases.*
 import com.example.todo_list.presentation.model.EditableNote
 import com.example.todo_list.presentation.ui.base.BasePresenter
 import dagger.assisted.Assisted
@@ -21,6 +19,7 @@ class EditNotePresenter @AssistedInject constructor(
     private val updateNoteText: UpdateNoteTextUseCase,
     private val deleteNote: DeleteNoteUseCase,
     private val updateNoteReminderState: UpdateNoteReminderStateUseCase,
+    private val observeNote: ObserveNoteUseCase,
 ) : BasePresenter<EditNoteView>() {
 
     private val note: EditableNote = EditableNote(
@@ -32,19 +31,23 @@ class EditNotePresenter @AssistedInject constructor(
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
-        if (originalNote == null) {
-            viewState.setToolbar(
-                isNewNote = true,
-                isReminderActive = note.isReminderActive,
-                isDeletingAvailable = false
-            )
-        } else {
-            viewState.setToolbar(
-                isNewNote = false,
-                isReminderActive = note.isReminderActive,
-                isDeletingAvailable = true
-            )
-            viewState.setText(note.text)
+        viewState.setToolbar(
+            isNewNote = originalNote == null,
+            isReminderActive = note.isReminderActive,
+            isDeletingAvailable = originalNote != null
+        )
+        viewState.setText(note.text)
+
+        if (originalNote != null) {
+            observeNote(originalNote.id).observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeByPresenter {
+                    if (note.isReminderActive != it.isReminderActive) {
+                        note.isReminderActive = it.isReminderActive
+                        viewState.setReminderState(it.isReminderActive)
+                    }
+                }
         }
     }
 
@@ -61,36 +64,35 @@ class EditNotePresenter @AssistedInject constructor(
         if (granted) {
             note.isReminderActive = !note.isReminderActive
             viewState.setReminderState(note.isReminderActive)
+        } else {
+            viewState.showErrorToast(R.string.edit_note_need_permission)
         }
     }
 
     fun onDeleteButtonClicked() {
-        deleteNote(originalNote!!.id)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { viewState.showProgressDialog() }
-            .doOnError {
-                viewState.showErrorToast()
-            }
-            .doFinally { viewState.hideProgressDialog() }
-            .subscribeByPresenter {
-                viewState.goBack()
-            }
+        if (originalNote != null) {
+            deleteNote(originalNote.id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { viewState.showProgressDialog() }
+                .doOnError {
+                    viewState.showErrorToast()
+                }
+                .doFinally { viewState.hideProgressDialog() }
+                .subscribeByPresenter {
+                    viewState.goBack()
+                }
+        }
     }
 
     fun onBackButtonClicked() {
-        if (originalNote != null) {
-            if (note.text != originalNote.text || note.isReminderActive != originalNote.isReminderActive) {
-                viewState.setExitConfirmationDialogState(true)
-            } else {
-                viewState.goBack()
-            }
+        if ((originalNote != null &&
+            (note.text != originalNote.text || note.isReminderActive != originalNote.isReminderActive)) ||
+            (originalNote == null && note.text != DEFAULT_TEXT)
+        ) {
+            viewState.showExitConfirmationDialog()
         } else {
-            if (note.text != DEFAULT_TEXT) {
-                viewState.setExitConfirmationDialogState(true)
-            } else {
-                viewState.goBack()
-            }
+            viewState.goBack()
         }
     }
 
@@ -98,31 +100,33 @@ class EditNotePresenter @AssistedInject constructor(
         if (isConfirmed) {
             viewState.goBack()
         } else {
-            viewState.setExitConfirmationDialogState(false)
+            viewState.hideExitConfirmationDialog()
         }
     }
 
     fun onSaveButtonClicked() {
-        Completable.merge(listOfNotNull(
-            if (originalNote == null)
-                createNote(note.text, note.isReminderActive)
-            else null,
+        Completable.merge(
+            listOfNotNull(
+                if (originalNote == null)
+                    createNote(note.text, note.isReminderActive)
+                else null,
 
-            if (originalNote !== null && note.text != originalNote.text)
-                updateNoteText(originalNote.id, note.text)
-            else null,
+                if (originalNote !== null && note.text != originalNote.text)
+                    updateNoteText(originalNote.id, note.text)
+                else null,
 
-            if (originalNote !== null && note.isReminderActive != originalNote.isReminderActive)
-                updateNoteReminderState(originalNote.id, note.isReminderActive)
-            else null
-        ))
+                if (originalNote !== null && note.isReminderActive != originalNote.isReminderActive)
+                    updateNoteReminderState(originalNote.id, note.isReminderActive)
+                else null
+            )
+        )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { viewState.showProgressDialog() }
             .doOnError {
                 viewState.showErrorToast()
             }
-            .doFinally {  viewState.hideProgressDialog() }
+            .doFinally { viewState.hideProgressDialog() }
             .subscribeByPresenter {
                 viewState.goBack()
             }

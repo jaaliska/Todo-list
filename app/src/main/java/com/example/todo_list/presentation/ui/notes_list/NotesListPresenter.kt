@@ -3,7 +3,7 @@ package com.example.todo_list.presentation.ui.notes_list
 import com.example.todo_list.domain.repository.PreferencesRepository
 import com.example.todo_list.domain.usecases.GetNoteByIdUseCase
 import com.example.todo_list.domain.usecases.ObserveNotesUseCase
-import com.example.todo_list.domain.usecases.UpdateNoteCompleteStateUseCase
+import com.example.todo_list.domain.usecases.UpdateNoteCompletionStateUseCase
 import com.example.todo_list.presentation.ui.base.BasePresenter
 import com.example.todo_list.presentation.ui.notes_list.mapper.NoteItemMapper
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -18,7 +18,7 @@ class NotesListPresenter @Inject constructor(
     private val userPreferences: PreferencesRepository,
     observeNotes: ObserveNotesUseCase,
     private val getNoteById: GetNoteByIdUseCase,
-    private val updateNoteCompleteState: UpdateNoteCompleteStateUseCase,
+    private val updateNoteCompletionState: UpdateNoteCompletionStateUseCase,
 ) : BasePresenter<NotesListView>() {
 
     private var isCompletedNotesPanelOpen = BehaviorSubject.createDefault(
@@ -64,7 +64,7 @@ class NotesListPresenter @Inject constructor(
     }
 
     fun onNoteCheckboxClicked(id: Int, isChecked: Boolean) {
-        updateNoteCompleteState(id, isCompleted = isChecked)
+        updateNoteCompletionState(id, isCompleted = isChecked)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeByPresenter({
@@ -91,6 +91,8 @@ class NotesListPresenter @Inject constructor(
         viewState.goToEditNoteScreen(null)
     }
 
+    @Suppress("SameParameterValue")
+    // For future swipe-refresh widget
     private fun refreshNotes(forceRefresh: Boolean) {
         notesObserver.startLoading(forceRefresh)
             .subscribeOn(Schedulers.io())

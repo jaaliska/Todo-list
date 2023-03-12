@@ -19,6 +19,7 @@
     <string name="cancel">Отменить</string>
     <string name="edit_note_dialog_tittle">Вы уверены, что хотите выйти?</string>
     <string name="edit_note_dialog_message">Изменения не сохранятся.</string>
+    <string name="edit_note_need_permission">Требуется разрешение для уведомлений</string>
 
 
     <!-- Notification -->

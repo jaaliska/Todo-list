@@ -99,8 +99,8 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
         }
     }
 
-    override fun setExitConfirmationDialogState(isShowing: Boolean) {
-        exitConfirmationDialog = if (isShowing) {
+    override fun showExitConfirmationDialog() {
+        exitConfirmationDialog =
             AlertDialog.Builder(context)
                 .setTitle(R.string.edit_note_dialog_tittle)
                 .setMessage(R.string.edit_note_dialog_message)
@@ -111,9 +111,12 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
                     presenter.onExitWithoutSavingConfirmed(false)
                 }
                 .show()
-        } else {
-            exitConfirmationDialog?.dismiss()
-            null
+    }
+
+    override fun hideExitConfirmationDialog() {
+        if (exitConfirmationDialog != null) {
+            exitConfirmationDialog!!.dismiss()
+            exitConfirmationDialog = null
         }
     }
 
