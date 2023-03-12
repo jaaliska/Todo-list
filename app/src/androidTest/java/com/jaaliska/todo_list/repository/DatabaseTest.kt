@@ -127,7 +127,7 @@ class DatabaseTest {
         val note = testDate.newNote1
         val updateCompleteState = true
         noteDao.save(note)
-        noteDao.updateCompleteState(1, updateCompleteState).test().onComplete()
+        noteDao.updateCompletionState(1, updateCompleteState).test().onComplete()
 
         val expectedNote = RoomNote(
             1,

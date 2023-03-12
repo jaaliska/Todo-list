@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.example.todo_list.app.TodoListDatabase
 import com.example.todo_list.data.dao.NoteDao
+import com.example.todo_list.data.dao.NoteDelayedDao
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -18,5 +19,5 @@ class DatabaseModule {
         .build()
 
     @Provides
-    fun provideNoteDao(db: TodoListDatabase): NoteDao = db.noteDao()
+    fun provideNoteDao(db: TodoListDatabase): NoteDao = NoteDelayedDao(db.noteDao())
 }

@@ -9,7 +9,7 @@ class GetNotesUseCase @Inject constructor(
     private val repository: NoteRepository
 ) {
 
-    operator fun invoke(completed: Boolean): Single<List<Note>> {
-        return repository.getAllByCompletionStatus(completed)
+    operator fun invoke(): Single<List<Note>> {
+        return repository.getAllNotes()
     }
 }

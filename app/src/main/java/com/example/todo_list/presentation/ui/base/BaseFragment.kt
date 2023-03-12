@@ -1,64 +1,22 @@
 package com.example.todo_list.presentation.ui.base
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Maybe
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.disposables.Disposable
+import android.widget.Toast
+import com.example.todo_list.R
+import com.example.todo_list.presentation.utils.ui_kit.ProgressDialog
 import moxy.MvpAppCompatFragment
 
-open class BaseFragment : MvpAppCompatFragment() {
+open class BaseFragment : MvpAppCompatFragment(), BaseMvpView {
 
-    private val lifecycleDisposables = CompositeDisposable()
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        lifecycleDisposables.clear()
+    override fun showProgressDialog() {
+        ProgressDialog.showProgress(requireContext())
     }
 
-    private fun Disposable.bindToLifecycle(): Disposable {
-        lifecycleDisposables.add(this)
-        return this
+    override fun hideProgressDialog() {
+        ProgressDialog.hideProgress()
     }
 
-    fun <T : Any> Single<T>.subscribeInLifecycle(
-        onError: (Throwable) -> Unit = {},
-        onNext: (T) -> Unit = {}
-    ): Disposable {
-        return this
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(onNext, onError)
-            .bindToLifecycle()
+    override fun showErrorToast(error: String?) {
+        val message = error ?: getString(R.string.something_went_wrong)
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
-
-    fun <T : Any> Maybe<T>.subscribeInLifecycle(
-        onError: (Throwable) -> Unit = {},
-        onNext: (T) -> Unit = {}
-    ): Disposable {
-        return this
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(onNext, onError)
-            .bindToLifecycle()
-    }
-
-    fun Completable.subscribeInLifecycle(
-        onError: (Throwable) -> Unit = {},
-        onComplete: () -> Unit = {}
-    ): Disposable {
-        return this.observeOn(AndroidSchedulers.mainThread())
-            .subscribe(onComplete, onError)
-            .bindToLifecycle()
-    }
-
-    fun <T : Any> Observable<T>.subscribeInLifecycle(
-        onError: (Throwable) -> Unit = {},
-        onComplete: (T) -> Unit = {}
-    ): Disposable {
-        return this.observeOn(AndroidSchedulers.mainThread())
-            .subscribe(onComplete, onError)
-            .bindToLifecycle()
-    }
-
 }

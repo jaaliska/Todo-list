@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
@@ -125,19 +124,6 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
 
     override fun goBack() {
         findNavController().popBackStack()
-    }
-
-    override fun showProgressDialog() {
-        progress.showProgress(requireContext())
-    }
-
-    override fun hideProgressDialog() {
-        progress.hideProgress()
-    }
-
-    override fun showErrorToast(error: String?) {
-        val message = error ?: getString(R.string.something_went_wrong)
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {

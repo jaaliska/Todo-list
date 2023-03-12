@@ -4,16 +4,18 @@ import com.example.todo_list.domain.model.Note
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 
-interface NoteRepository {
+interface NotesRepository {
+    fun getById(id: Int): Single<Note>
 
-    fun createNote(text: String, isReminderActive: Boolean): Single<Note>
-    fun getNoteById(id: Int): Single<Note>
-    fun getAllNotes(): Single<List<Note>>
-    fun updateNoteById(
+    fun observeById(id: Int): TriggeredObservable<Note>
+    fun observeAll(): TriggeredObservable<List<Note>>
+
+    fun create(text: String, isReminderActive: Boolean): Completable
+    fun update(
         id: Int,
         text: String? = null,
         isCompleted: Boolean? = null,
         isReminderActive : Boolean? = null
     ): Completable
-    fun deleteNote(noteId: Int): Completable
+    fun deleteNote(id: Int): Completable
 }

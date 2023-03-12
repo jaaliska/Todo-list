@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
@@ -92,19 +91,6 @@ class NotesListScreen : BaseFragment(), NotesListView {
     override fun goToEditNoteScreen(note: Note?) {
         val bundle = bundleOf("note" to note)
         findNavController().navigate(R.id.action_NotesListScreen_to_EditNoteScreen, bundle)
-    }
-
-    override fun showProgressDialog() {
-        ProgressDialog.showProgress(requireContext())
-    }
-
-    override fun hideProgressDialog() {
-        ProgressDialog.hideProgress()
-    }
-
-    override fun showErrorToast(error: String?) {
-        val message = error ?: getString(R.string.something_went_wrong)
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun createListAdapter() = NotesListAdapter(
