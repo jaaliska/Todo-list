@@ -19,12 +19,14 @@ class CachedNotesRepository @Inject constructor(
     private val db: NoteDao
 ) : NotesRepository {
 
-    private val cache = TriggeredSubject.create(this::loadAllFromDb) {
+    private val cache = TriggeredSubject.create({
+        this.loadAllFromDb().subscribeOn(Schedulers.io())
+    }) {
         it.values.toList()
     }
 
     override fun getById(id: Int): Single<Note> {
-        val found = cache.subject.value?.get(id)
+        val found = cache.getValue()?.get(id)
         if (found != null) {
             return Single.just(found)
         }
@@ -44,7 +46,9 @@ class CachedNotesRepository @Inject constructor(
             }
         val observable = observeByIdSubj.doOnDispose(subscription::dispose)
 
-        return TriggeredSubject(observeByIdSubj, observable) { loadByIdFromDb(id) }
+        return TriggeredSubject(observeByIdSubj, observable) {
+            loadByIdFromDb(id).subscribeOn(Schedulers.io())
+        }
     }
 
     override fun observeAll(): TriggeredObservable<List<Note>> {
@@ -59,7 +63,7 @@ class CachedNotesRepository @Inject constructor(
         )
         return db.save(roomNote)
             .doOnSuccess { id ->
-                cache.update {
+                cache.updateOrRefresh {
                     it[id.toInt()] = Note(id.toInt(), text, false, isReminderActive)
                     it
                 }
@@ -77,7 +81,7 @@ class CachedNotesRepository @Inject constructor(
         isCompleted: Boolean?,
         isReminderActive: Boolean?
     ): Completable {
-        val tree = cache.subject.value
+        val tree = cache.getValue()
         val foundNote = tree?.get(id)
         if (foundNote != null) {
             tree[id] = Note(
@@ -92,7 +96,7 @@ class CachedNotesRepository @Inject constructor(
                 .subscribeOn(Schedulers.io())
                 .subscribe({}) {
                     Log.e("CachedNotesRepository", "error updating note $id: $it")
-                    cache.update { tree ->
+                    cache.updateOrRefresh { tree ->
                         // rollback on error
                         tree[id] = foundNote
                         tree
@@ -108,7 +112,7 @@ class CachedNotesRepository @Inject constructor(
 
     @SuppressLint("CheckResult")
     override fun deleteNote(id: Int): Completable {
-        val tree = cache.subject.value
+        val tree = cache.getValue()
         val note = tree?.get(id)
         if (note != null) {
             tree.remove(id)
@@ -119,7 +123,7 @@ class CachedNotesRepository @Inject constructor(
                 .subscribe({}) {
                     Log.e("CachedNotesRepository", "error deleting note $id: $it")
                     // rollback on error
-                    cache.update { tree ->
+                    cache.updateOrRefresh { tree ->
                         tree[id] = note
                         tree
                     }

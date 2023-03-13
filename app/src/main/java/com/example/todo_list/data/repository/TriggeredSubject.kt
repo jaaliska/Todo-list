@@ -6,7 +6,6 @@ import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class TriggeredSubject<T: Any, R: Any>(
@@ -27,10 +26,11 @@ class TriggeredSubject<T: Any, R: Any>(
 
     override fun stopLoading() {
         dbLoadingDisposable?.dispose()
-        dbLoading = null
     }
 
-    fun update(updateSubjValueCallback: (value: T) -> T): Completable {
+    fun getValue(): T? = subject.value
+
+    fun updateOrRefresh(updateSubjValueCallback: (value: T) -> T): Completable {
         val value = subject.value
         return if (value != null) {
             subject.onNext(updateSubjValueCallback(value))
@@ -43,15 +43,18 @@ class TriggeredSubject<T: Any, R: Any>(
     private fun refreshSubject(): Completable {
         var dbLoading = this.dbLoading
         if (dbLoading == null) {
-            dbLoading = loadSubjectData().doFinally {
-                this.dbLoading = null
-                this.dbLoadingDisposable = null
-            }
-            dbLoadingDisposable = dbLoading
-                .subscribeOn(Schedulers.io())
-                .subscribe(subject::onNext) {
+            dbLoading = loadSubjectData()
+                .doOnSuccess {
+                    subject.onNext(it)
+                }
+                .doFinally {
+                    this.dbLoading = null
+                    this.dbLoadingDisposable = null
+                }
+            dbLoadingDisposable = dbLoading.subscribe({}) {
                 Log.e("TriggeredSubject", "error refreshing subject: $it")
             }
+            return Completable.fromSingle(dbLoading)
         }
         return Completable.fromSingle(dbLoading)
     }

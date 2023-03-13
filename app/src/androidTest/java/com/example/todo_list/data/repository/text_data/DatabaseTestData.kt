@@ -41,7 +41,7 @@ object DatabaseTestData {
         isReminderActive = true
     )
 
-    val listCreatedNotes = listOf<RoomNote>( createdNote1, createdNote2, createdNote3)
+    val listCreatedNotes = listOf(createdNote1, createdNote2, createdNote3)
 
 
 }

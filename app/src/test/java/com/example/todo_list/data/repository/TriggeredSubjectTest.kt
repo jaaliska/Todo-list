@@ -1,11 +1,15 @@
 package com.example.todo_list.data.repository
 
+import com.example.todo_list.testTools.TestSchedulerSetup
 import io.reactivex.rxjava3.core.Single
 import org.junit.Assert.*
 import org.junit.Test
 import java.util.concurrent.TimeUnit
 
 class TriggeredSubjectTest {
+
+    companion object: TestSchedulerSetup()
+
     @Test
     fun loadsFromDb() {
         val ts = TriggeredSubject.create(
@@ -13,31 +17,28 @@ class TriggeredSubjectTest {
             { v -> v.uppercase()}
         )
 
-        val receivedValues = mutableListOf<String>()
-        assertNull(ts.subject.value)
-        val disposable = ts.observable.subscribe(
-            { receivedValues.add(it) },
-            { assertTrue(false) }
-        )
-        ts.startLoading(false)
-        Thread.sleep(2)
-        assertArrayEquals(arrayOf("ABC"), receivedValues.toTypedArray())
-        receivedValues.clear()
+        assertNull(ts.getValue())
+        val observer = ts.observable.test()
 
-        ts.update { "cde" }
-        assertArrayEquals(arrayOf("CDE"), receivedValues.toTypedArray())
-        receivedValues.clear()
+        ts.startLoading(false)
+        jumpMsAhead(2)
+        observer.assertValue("ABC")
+
+        ts.updateOrRefresh { "cde" }
+        observer.assertValues("ABC", "CDE")
 
         ts.startLoading(true)
-        Thread.sleep(2)
-        assertArrayEquals(arrayOf("ABC"), receivedValues.toTypedArray())
-        receivedValues.clear()
+        jumpMsAhead(2)
+        observer.assertValues("ABC", "CDE", "ABC")
 
+        ts.updateOrRefresh { "fgh" }
+        observer.assertValues("ABC", "CDE", "ABC", "FGH")
         ts.startLoading(true)
         ts.stopLoading()
-        Thread.sleep(2)
-        assertArrayEquals(arrayOf(), receivedValues.toTypedArray())
+        jumpMsAhead(2)
 
-        disposable.dispose()
+        observer.assertValues("ABC", "CDE", "ABC", "FGH")
+
+        observer.dispose()
     }
 }
