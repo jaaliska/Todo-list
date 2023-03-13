@@ -1,5 +1,5 @@
 # Todo-list
-Technical task
+(Technical task)
 This is a classical Todo-list Android application.
 
 ### Applied technologies and libraries: 
