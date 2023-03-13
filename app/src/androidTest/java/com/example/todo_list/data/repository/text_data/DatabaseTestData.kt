@@ -1,4 +1,4 @@
-package com.jaaliska.todo_list.repository.test_data
+package com.example.todo_list.data.repository.text_data
 
 import com.example.todo_list.data.model.RoomNote
 

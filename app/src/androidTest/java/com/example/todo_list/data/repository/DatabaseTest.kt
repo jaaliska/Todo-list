@@ -1,4 +1,4 @@
-package com.jaaliska.todo_list.repository
+package com.example.todo_list.data.repository
 
 import android.content.Context
 import android.util.Log
@@ -8,7 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.todo_list.app.TodoListDatabase
 import com.example.todo_list.data.dao.NoteDao
 import com.example.todo_list.data.model.RoomNote
-import com.jaaliska.todo_list.repository.test_data.DatabaseTestData
+import com.example.todo_list.data.repository.text_data.DatabaseTestData
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -19,7 +19,7 @@ import java.io.IOException
 class DatabaseTest {
     private lateinit var noteDao: NoteDao
     private lateinit var db: TodoListDatabase
-    private val testDate = DatabaseTestData
+    private val testData = DatabaseTestData
 
     @Before
     fun createDb() {
@@ -38,22 +38,32 @@ class DatabaseTest {
 
     @Test
     fun testSaveAndGetNotes() {
-        noteDao.save(testDate.newNote1)
-        noteDao.save(testDate.newNote2)
-        noteDao.save(testDate.newNote3)
+        noteDao.save(testData.newNote1).test()
+            .assertValue {
+                it == 1L
+            }
+        noteDao.save(testData.newNote2).test()
+            .assertValue {
+                it == 2L
+            }
+        noteDao.save(testData.newNote3).test()
+            .assertValue {
+                it == 3L
+            }
+
         noteDao.getAll().test()
             .assertValue {
                 Log.i("MyCheck", it.toString())
-                it == testDate.listCreatedNotes
+                it == testData.listCreatedNotes
             }
     }
 
     @Test
     fun testGetNoteById() {
-        val expectedNote = testDate.createdNote1
-        noteDao.save(testDate.newNote1)
-        noteDao.save(testDate.newNote2)
-        noteDao.save(testDate.newNote3)
+        val expectedNote = testData.createdNote1
+        noteDao.save(testData.newNote1).test().onComplete()
+        noteDao.save(testData.newNote2).test().onComplete()
+        noteDao.save(testData.newNote3).test().onComplete()
         noteDao.getNoteById(expectedNote.id!!).test()
             .assertValue {
                 Log.i("MyCheck", it.toString())
@@ -63,24 +73,24 @@ class DatabaseTest {
 
     @Test
     fun testSaveNewDuplicatedNotes() {
-        noteDao.save(testDate.newNote1)
-        noteDao.save(testDate.newNote2)
-        noteDao.save(testDate.newNote3)
-        noteDao.save(testDate.createdNote2)
+        noteDao.save(testData.newNote1).test().onComplete()
+        noteDao.save(testData.newNote2).test().onComplete()
+        noteDao.save(testData.newNote3).test().onComplete()
+        noteDao.save(testData.createdNote2).test().onComplete()
         noteDao.getAll().test()
             .assertValue {
                 Log.i("MyCheck", it.toString())
-                it == testDate.listCreatedNotes
+                it == testData.listCreatedNotes
             }
     }
 
     @Test
     fun testDeleteNote() {
-        noteDao.save(testDate.newNote1)
-        noteDao.save(testDate.newNote2)
-        noteDao.save(testDate.newNote3)
+        noteDao.save(testData.newNote1).test().onComplete()
+        noteDao.save(testData.newNote2).test().onComplete()
+        noteDao.save(testData.newNote3).test().onComplete()
         noteDao.delete(2).test().onComplete()
-        val expectedList = listOf<RoomNote>(testDate.createdNote1, testDate.createdNote3)
+        val expectedList = listOf<RoomNote>(testData.createdNote1, testData.createdNote3)
         noteDao.getAll().test()
             .assertValue {
                 Log.i("MyCheck", it.toString())
@@ -90,11 +100,11 @@ class DatabaseTest {
 
     @Test
     fun testDeleteFirstNote() {
-        noteDao.save(testDate.newNote1)
-        noteDao.save(testDate.newNote2)
-        noteDao.save(testDate.newNote3)
+        noteDao.save(testData.newNote1).test().onComplete()
+        noteDao.save(testData.newNote2).test().onComplete()
+        noteDao.save(testData.newNote3).test().onComplete()
         noteDao.delete(1).test().onComplete()
-        val expectedList = listOf<RoomNote>(testDate.createdNote2, testDate.createdNote3)
+        val expectedList = listOf<RoomNote>(testData.createdNote2, testData.createdNote3)
         noteDao.getAll().test()
             .assertValue {
                 Log.i("MyCheck", it.toString())
@@ -104,9 +114,9 @@ class DatabaseTest {
 
     @Test
     fun testUpdateNoteText() {
-        val note = testDate.newNote1
+        val note = testData.newNote1
         val updateText = "updated text"
-        noteDao.save(note)
+        noteDao.save(note).test().onComplete()
         noteDao.updateText(1, updateText).test().onComplete()
 
         val expectedNote = RoomNote(
@@ -124,9 +134,9 @@ class DatabaseTest {
 
     @Test
     fun testUpdateNoteCompleteState() {
-        val note = testDate.newNote1
+        val note = testData.newNote1
         val updateCompleteState = true
-        noteDao.save(note)
+        noteDao.save(note).test().onComplete()
         noteDao.updateCompletionState(1, updateCompleteState).test().onComplete()
 
         val expectedNote = RoomNote(
@@ -144,9 +154,9 @@ class DatabaseTest {
 
     @Test
     fun testUpdateNoteReminderState() {
-        val note = testDate.newNote1
+        val note = testData.newNote1
         val updateReminderState = true
-        noteDao.save(note)
+        noteDao.save(note).test().onComplete()
         noteDao.updateReminderState(1, updateReminderState).test().onComplete()
 
         val expectedNote = RoomNote(
