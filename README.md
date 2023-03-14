@@ -1,3 +1,5 @@
+[![Android CI](https://github.com/jaaliska/Todo-list/actions/workflows/build-release.yml/badge.svg)](https://github.com/jaaliska/Todo-list/actions/workflows/build-release.yml)
+
 # Todo-list
 (Technical task)
 This is a classical Todo-list Android application.
