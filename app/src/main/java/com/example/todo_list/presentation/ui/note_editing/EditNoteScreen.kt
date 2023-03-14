@@ -22,7 +22,7 @@ class EditNoteScreen : BaseFragment(), EditNoteView {
 
     @Inject
     lateinit var presenterFactory: EditNotePresenterFactory
-    private val presenter by moxyPresenter<EditNotePresenter> {
+    private val presenter by moxyPresenter {
         presenterFactory.create(
             arguments?.getParcelable(KEY_NOTE)
         )

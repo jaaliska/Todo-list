@@ -29,5 +29,6 @@
     <!-- Error -->
     <string name="something_went_wrong">Что-то пошло не так</string>
     <string name="create_new_note">Создать новую заметку</string>
+    <string name="save_changes_description">Сохранить изменения</string>
 
 </resources>

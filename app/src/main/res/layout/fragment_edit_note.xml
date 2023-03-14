@@ -45,5 +45,5 @@
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="16dp"
         app:srcCompat="@drawable/ic_tick"
-        android:contentDescription="Save changes" />
+        android:contentDescription="@string/save_changes_description" />
 </androidx.constraintlayout.widget.ConstraintLayout>
